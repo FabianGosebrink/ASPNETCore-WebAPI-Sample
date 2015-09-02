@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Linq;
 using Microsoft.AspNet.Mvc;
 using SampleWebApiMVC6.Models;
 using SampleWebApiMVC6.Services;
@@ -24,8 +21,7 @@ namespace SampleWebApiMVC6.Controllers
             return new ObjectResult(Singleton.Instance.Houses.Select(x => _houseMapper.MapToDto(x)));
         }
 
-        [HttpGet]
-        [Route("{id:int}", Name="GetSingleHouse")]
+        [HttpGet("{id:int}", Name = "GetSingleHouse")]
         public IActionResult GetSingle(int id)
         {
             HouseEntity houseEntity = Singleton.Instance.Houses.FirstOrDefault(x => x.Id == id);
@@ -58,8 +54,7 @@ namespace SampleWebApiMVC6.Controllers
             return CreatedAtRoute("GetSingleHouse", new { id = houseEntity.Id }, _houseMapper.MapToDto(houseEntity));
         }
 
-        [HttpPut]
-        [Route("{id:int}")]
+        [HttpPut("{id:int}")]
         public IActionResult Update(int id, [FromBody] HouseDto houseDto)
         {
             if(houseDto == null)
@@ -88,8 +83,7 @@ namespace SampleWebApiMVC6.Controllers
             return new ObjectResult(_houseMapper.MapToDto(houseEntityToUpdate));
         }
 
-        [HttpDelete]
-        [Route("{id:int}")]
+        [HttpDelete("{id:int}")]
         public IActionResult Delete(int id)
         {
             HouseEntity houseEntityToDelete = Singleton.Instance.Houses.FirstOrDefault(x => x.Id == id);
