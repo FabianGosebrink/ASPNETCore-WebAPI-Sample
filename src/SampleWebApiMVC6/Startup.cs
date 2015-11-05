@@ -9,13 +9,24 @@ using Microsoft.AspNet.Routing;
 using Microsoft.Framework.DependencyInjection;
 using SampleWebApiMVC6.Models;
 using SampleWebApiMVC6.Services;
+using Microsoft.Framework.Configuration;
+using Microsoft.Dnx.Runtime;
 
 namespace SampleWebApiMVC6
 {
     public class Startup
     {
-        public Startup(IHostingEnvironment env)
+        IConfigurationRoot Configuration; 
+
+        public Startup(IApplicationEnvironment env)
         {
+            var builder = new ConfigurationBuilder()
+                            .SetBasePath(env.ApplicationBasePath)
+                            //.AddJsonFile("config.json")
+                            .AddEnvironmentVariables();
+
+            Configuration = builder.Build();
+
             List<HouseEntity> houses = new List<HouseEntity>()
             {
                 new HouseEntity() {City = "Town1", Id = 1, Street = "Street1", ZipCode = 1234},
@@ -42,6 +53,7 @@ namespace SampleWebApiMVC6
         // Configure is called after ConfigureServices is called.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
+            app.UseIISPlatformHandler();
             // Configure the HTTP request pipeline.
             app.UseStaticFiles();
 

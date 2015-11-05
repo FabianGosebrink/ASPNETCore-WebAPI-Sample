@@ -18,7 +18,7 @@ namespace SampleWebApiMVC6.Controllers
         [HttpGet]
         public IActionResult Get()
         {
-            return new ObjectResult(Singleton.Instance.Houses.Select(x => _houseMapper.MapToDto(x)));
+            return Json(Singleton.Instance.Houses.Select(x => _houseMapper.MapToDto(x)));
         }
 
         [HttpGet("{id:int}", Name = "GetSingleHouse")]
@@ -31,7 +31,7 @@ namespace SampleWebApiMVC6.Controllers
                 return new HttpNotFoundResult();
             }
 
-            return new ObjectResult(_houseMapper.MapToDto(houseEntity));
+            return Json(_houseMapper.MapToDto(houseEntity));
         }
 
         [HttpPost]
