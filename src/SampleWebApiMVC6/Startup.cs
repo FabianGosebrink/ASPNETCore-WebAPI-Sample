@@ -4,29 +4,30 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Builder;
 using Microsoft.AspNet.Hosting;
-using Microsoft.AspNet.Http;
-using Microsoft.AspNet.Routing;
-using Microsoft.Framework.DependencyInjection;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using SampleWebApiMVC6.Models;
 using SampleWebApiMVC6.Services;
-using Microsoft.Framework.Configuration;
-using Microsoft.Dnx.Runtime;
 
 namespace SampleWebApiMVC6
 {
     public class Startup
     {
-        IConfigurationRoot Configuration; 
-
-        public Startup(IApplicationEnvironment env)
+        public Startup(IHostingEnvironment env)
         {
+            // Set up configuration sources.
             var builder = new ConfigurationBuilder()
-                            .SetBasePath(env.ApplicationBasePath)
-                            //.AddJsonFile("config.json")
-                            .AddEnvironmentVariables();
-
+                .AddJsonFile("appsettings.json")
+                .AddEnvironmentVariables();
             Configuration = builder.Build();
+        }
 
+        public IConfigurationRoot Configuration { get; set; }
+
+        // This method gets called by the runtime. Use this method to add services to the container.
+        public void ConfigureServices(IServiceCollection services)
+        {
             List<HouseEntity> houses = new List<HouseEntity>()
             {
                 new HouseEntity() {City = "Town1", Id = 1, Street = "Street1", ZipCode = 1234},
@@ -36,31 +37,26 @@ namespace SampleWebApiMVC6
             };
 
             Singleton.Instance.Houses = houses;
-        }
-
-        // This method gets called by a runtime.
-        // Use this method to add services to the container
-        public void ConfigureServices(IServiceCollection services)
-        {
-            services.AddMvc();
-            // Uncomment the following line to add Web API services which makes it easier to port Web API 2 controllers.
-            // You will also need to add the Microsoft.AspNet.Mvc.WebApiCompatShim package to the 'dependencies' section of project.json.
-            // services.AddWebApiConventions();
 
             services.AddTransient<IHouseMapper, HouseMapper>();
+            // Add framework services.
+            services.AddMvc();
         }
 
-        // Configure is called after ConfigureServices is called.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
+            loggerFactory.AddConsole(Configuration.GetSection("Logging"));
+            loggerFactory.AddDebug();
+
             app.UseIISPlatformHandler();
-            // Configure the HTTP request pipeline.
+
             app.UseStaticFiles();
 
-            // Add MVC to the request pipeline.
             app.UseMvc();
-            // Add the following route for porting Web API 2 controllers.
-            // routes.MapWebApiRoute("DefaultApi", "api/{controller}/{id?}");
         }
+
+        // Entry point for the application.
+        public static void Main(string[] args) => WebApplication.Run<Startup>(args);
     }
 }

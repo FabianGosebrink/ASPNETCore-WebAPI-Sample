@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using Microsoft.AspNet.Mvc;
 using SampleWebApiMVC6.Models;
 using SampleWebApiMVC6.Services;
@@ -6,7 +7,7 @@ using SampleWebApiMVC6.Services;
 namespace SampleWebApiMVC6.Controllers
 {
     [Route("api/[controller]")]
-    public class HouseController : Controller
+    public class HouseController
     {
         private readonly IHouseMapper _houseMapper;
 
@@ -18,7 +19,7 @@ namespace SampleWebApiMVC6.Controllers
         [HttpGet]
         public IActionResult Get()
         {
-            return Json(Singleton.Instance.Houses.Select(x => _houseMapper.MapToDto(x)));
+            return new JsonResult(Singleton.Instance.Houses.Select(x => _houseMapper.MapToDto(x)));
         }
 
         [HttpGet("{id:int}", Name = "GetSingleHouse")]
@@ -26,50 +27,40 @@ namespace SampleWebApiMVC6.Controllers
         {
             HouseEntity houseEntity = Singleton.Instance.Houses.FirstOrDefault(x => x.Id == id);
 
-            if(houseEntity == null)
+            if (houseEntity == null)
             {
                 return new HttpNotFoundResult();
             }
 
-            return Json(_houseMapper.MapToDto(houseEntity));
+            return new JsonResult(_houseMapper.MapToDto(houseEntity));
         }
 
         [HttpPost]
         public IActionResult Create([FromBody] HouseDto houseDto)
         {
-            if(houseDto == null)
+            if (houseDto == null)
             {
-                return HttpBadRequest();
-            }
-
-            if(!ModelState.IsValid)
-            {
-                return new BadRequestObjectResult(ModelState);
+                return new BadRequestResult();
             }
 
             HouseEntity houseEntity = _houseMapper.MapToEntity(houseDto);
 
             Singleton.Instance.Houses.Add(houseEntity);
 
-            return CreatedAtRoute("GetSingleHouse", new { id = houseEntity.Id }, _houseMapper.MapToDto(houseEntity));
+            return new CreatedAtRouteResult("GetSingleHouse", new { id = houseEntity.Id }, _houseMapper.MapToDto(houseEntity));
         }
 
         [HttpPut("{id:int}")]
         public IActionResult Update(int id, [FromBody] HouseDto houseDto)
         {
-            if(houseDto == null)
+            if (houseDto == null)
             {
-                return HttpBadRequest();
-            }
-
-            if(!ModelState.IsValid)
-            {
-                return new BadRequestObjectResult(ModelState);
+                return new BadRequestResult();
             }
 
             HouseEntity houseEntityToUpdate = Singleton.Instance.Houses.FirstOrDefault(x => x.Id == id);
 
-            if(houseEntityToUpdate == null)
+            if (houseEntityToUpdate == null)
             {
                 return new HttpNotFoundResult();
             }
@@ -80,7 +71,7 @@ namespace SampleWebApiMVC6.Controllers
 
             //Update to Database --> Is singleton in this case....
 
-            return new ObjectResult(_houseMapper.MapToDto(houseEntityToUpdate));
+            return new JsonResult(_houseMapper.MapToDto(houseEntityToUpdate));
         }
 
         [HttpDelete("{id:int}")]
@@ -88,7 +79,7 @@ namespace SampleWebApiMVC6.Controllers
         {
             HouseEntity houseEntityToDelete = Singleton.Instance.Houses.FirstOrDefault(x => x.Id == id);
 
-            if(houseEntityToDelete == null)
+            if (houseEntityToDelete == null)
             {
                 return new HttpNotFoundResult();
             }
