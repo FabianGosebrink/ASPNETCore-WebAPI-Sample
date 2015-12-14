@@ -1,13 +1,16 @@
 ﻿using System;
 using System.Linq;
 using Microsoft.AspNet.Mvc;
+using Microsoft.AspNet.Mvc.ModelBinding;
 using SampleWebApiMVC6.Models;
 using SampleWebApiMVC6.Services;
+using System.Collections.Generic;
+using Microsoft.AspNet.JsonPatch;
 
 namespace SampleWebApiMVC6.Controllers
 {
     [Route("api/[controller]")]
-    public class HouseController
+    public class HouseController : Controller
     {
         private readonly IHouseMapper _houseMapper;
 
@@ -35,12 +38,47 @@ namespace SampleWebApiMVC6.Controllers
             return new JsonResult(_houseMapper.MapToDto(houseEntity));
         }
 
+        [HttpPatch]
+        public IActionResult Patch(int id, [FromBody] JsonPatchDocument<HouseDto> housePatchDocument)
+        {
+            if (housePatchDocument == null)
+            {
+                return HttpBadRequest();
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return HttpBadRequest(ModelState);
+            }
+
+            HouseEntity houseEntity = Singleton.Instance.Houses.FirstOrDefault(x => x.Id == id);
+
+            HouseDto existingHouse = _houseMapper.MapToDto(houseEntity);
+
+            housePatchDocument.ApplyTo(existingHouse, ModelState);
+
+            if (!ModelState.IsValid)
+            {
+                return HttpBadRequest(ModelState);
+            }
+
+            int index = Singleton.Instance.Houses.FindIndex(x => x.Id == id);
+            Singleton.Instance.Houses[index] = _houseMapper.MapToEntity(existingHouse);
+
+            return new JsonResult(existingHouse);
+        }
+
         [HttpPost]
         public IActionResult Create([FromBody] HouseDto houseDto)
         {
             if (houseDto == null)
             {
                 return new BadRequestResult();
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return HttpBadRequest(ModelState);
             }
 
             HouseEntity houseEntity = _houseMapper.MapToEntity(houseDto);
@@ -56,6 +94,11 @@ namespace SampleWebApiMVC6.Controllers
             if (houseDto == null)
             {
                 return new BadRequestResult();
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return HttpBadRequest(ModelState);
             }
 
             HouseEntity houseEntityToUpdate = Singleton.Instance.Houses.FirstOrDefault(x => x.Id == id);
