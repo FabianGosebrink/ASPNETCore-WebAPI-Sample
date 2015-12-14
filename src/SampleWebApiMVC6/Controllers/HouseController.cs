@@ -38,8 +38,8 @@ namespace SampleWebApiMVC6.Controllers
             return new JsonResult(_houseMapper.MapToDto(houseEntity));
         }
 
-        [HttpPatch]
-        public IActionResult Patch(int id, [FromBody] JsonPatchDocument<HouseDto> housePatchDocument)
+        [HttpPatch("{id}")]
+        public IActionResult Patch(int id, [FromBody] JsonPatchDocument<HouseEntity> housePatchDocument)
         {
             if (housePatchDocument == null)
             {
@@ -53,9 +53,7 @@ namespace SampleWebApiMVC6.Controllers
 
             HouseEntity houseEntity = Singleton.Instance.Houses.FirstOrDefault(x => x.Id == id);
 
-            HouseDto existingHouse = _houseMapper.MapToDto(houseEntity);
-
-            housePatchDocument.ApplyTo(existingHouse, ModelState);
+            housePatchDocument.ApplyTo(houseEntity, ModelState);
 
             if (!ModelState.IsValid)
             {
@@ -63,9 +61,9 @@ namespace SampleWebApiMVC6.Controllers
             }
 
             int index = Singleton.Instance.Houses.FindIndex(x => x.Id == id);
-            Singleton.Instance.Houses[index] = _houseMapper.MapToEntity(existingHouse);
+            Singleton.Instance.Houses[index] = houseEntity;
 
-            return new JsonResult(existingHouse);
+            return new JsonResult(_houseMapper.MapToDto(houseEntity));
         }
 
         [HttpPost]
