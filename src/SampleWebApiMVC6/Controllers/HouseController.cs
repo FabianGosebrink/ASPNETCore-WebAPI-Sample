@@ -1,11 +1,9 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using Microsoft.AspNet.Mvc;
-using Microsoft.AspNet.Mvc.ModelBinding;
 using SampleWebApiMVC6.Models;
 using SampleWebApiMVC6.Services;
-using System.Collections.Generic;
 using Microsoft.AspNet.JsonPatch;
+using SampleWebApiMVC6.Repositories;
 
 namespace SampleWebApiMVC6.Controllers
 {
@@ -13,29 +11,31 @@ namespace SampleWebApiMVC6.Controllers
     public class HouseController : Controller
     {
         private readonly IHouseMapper _houseMapper;
+        private readonly IHouseRepository _houseRepository;
 
-        public HouseController(IHouseMapper houseMapper)
+        public HouseController(IHouseMapper houseMapper, IHouseRepository houseRepository)
         {
             _houseMapper = houseMapper;
+            _houseRepository = houseRepository;
         }
 
         [HttpGet]
         public IActionResult Get()
         {
-            return new JsonResult(Singleton.Instance.Houses.Select(x => _houseMapper.MapToDto(x)));
+            return Ok(_houseRepository.GetAll().Select(x => _houseMapper.MapToDto(x)));
         }
 
         [HttpGet("{id:int}", Name = "GetSingleHouse")]
         public IActionResult GetSingle(int id)
         {
-            HouseEntity houseEntity = Singleton.Instance.Houses.FirstOrDefault(x => x.Id == id);
+            HouseEntity houseEntity = _houseRepository.GetSingle(id);
 
             if (houseEntity == null)
             {
                 return new HttpNotFoundResult();
             }
 
-            return new JsonResult(_houseMapper.MapToDto(houseEntity));
+            return Ok(_houseMapper.MapToDto(houseEntity));
         }
 
         [HttpPatch]
@@ -51,7 +51,7 @@ namespace SampleWebApiMVC6.Controllers
                 return HttpBadRequest(ModelState);
             }
 
-            HouseEntity houseEntity = Singleton.Instance.Houses.FirstOrDefault(x => x.Id == id);
+            HouseEntity houseEntity = _houseRepository.GetSingle(id);
 
             HouseDto existingHouse = _houseMapper.MapToDto(houseEntity);
 
@@ -62,10 +62,9 @@ namespace SampleWebApiMVC6.Controllers
                 return HttpBadRequest(ModelState);
             }
 
-            int index = Singleton.Instance.Houses.FindIndex(x => x.Id == id);
-            Singleton.Instance.Houses[index] = _houseMapper.MapToEntity(existingHouse);
+            _houseRepository.Update(_houseMapper.MapToEntity(existingHouse));
 
-            return new JsonResult(existingHouse);
+            return Ok(existingHouse);
         }
 
         [HttpPost]
@@ -83,7 +82,7 @@ namespace SampleWebApiMVC6.Controllers
 
             HouseEntity houseEntity = _houseMapper.MapToEntity(houseDto);
 
-            Singleton.Instance.Houses.Add(houseEntity);
+            _houseRepository.Add(houseEntity);
 
             return new CreatedAtRouteResult("GetSingleHouse", new { id = houseEntity.Id }, _houseMapper.MapToDto(houseEntity));
         }
@@ -101,7 +100,7 @@ namespace SampleWebApiMVC6.Controllers
                 return HttpBadRequest(ModelState);
             }
 
-            HouseEntity houseEntityToUpdate = Singleton.Instance.Houses.FirstOrDefault(x => x.Id == id);
+            HouseEntity houseEntityToUpdate = _houseRepository.GetSingle(id);
 
             if (houseEntityToUpdate == null)
             {
@@ -114,20 +113,20 @@ namespace SampleWebApiMVC6.Controllers
 
             //Update to Database --> Is singleton in this case....
 
-            return new JsonResult(_houseMapper.MapToDto(houseEntityToUpdate));
+            return Ok(_houseMapper.MapToDto(houseEntityToUpdate));
         }
 
         [HttpDelete("{id:int}")]
         public IActionResult Delete(int id)
         {
-            HouseEntity houseEntityToDelete = Singleton.Instance.Houses.FirstOrDefault(x => x.Id == id);
+            HouseEntity houseEntityToDelete = _houseRepository.GetSingle(id);
 
             if (houseEntityToDelete == null)
             {
                 return new HttpNotFoundResult();
             }
 
-            Singleton.Instance.Houses.Remove(houseEntityToDelete);
+            _houseRepository.Delete(id);
 
             return new NoContentResult();
         }
