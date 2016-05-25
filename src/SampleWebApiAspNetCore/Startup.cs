@@ -6,9 +6,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SampleWebApiAspNetCore.Models;
+using SampleWebApiAspNetCore.Repositories;
 using SampleWebApiAspNetCore.Services;
 
-namespace SampleWebApiMVC6
+namespace SampleWebApiAspNetCore
 {
     public class Startup
     {
@@ -37,7 +38,7 @@ namespace SampleWebApiMVC6
                 new HouseEntity() {City = "Town4", Id = 4, Street = "Street4", ZipCode = 3456}
             };
 
-            Singleton.Instance.Houses = houses;
+            services.AddSingleton<IHouseRepository, HouseRepository>();
 
             services.AddTransient<IHouseMapper, HouseMapper>();
             // Add framework services.
@@ -59,14 +60,11 @@ namespace SampleWebApiMVC6
         //// Entry point for the application.
         public static void Main(string[] args)
         {
-            var host = new WebHostBuilder()
-                 .UseKestrel()
-                 .UseContentRoot(Directory.GetCurrentDirectory())
-                 .UseIISIntegration()
+            var host = WebHostBuilderIISExtensions.UseIISIntegration(WebHostBuilderExtensions.UseContentRoot(WebHostBuilderKestrelExtensions.UseKestrel(new WebHostBuilder()), Directory.GetCurrentDirectory()))
                  .UseStartup<Startup>()
                  .Build();
 
-            host.Run();
+            WebHostExtensions.Run(host);
         }
     }
 }

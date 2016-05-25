@@ -20,7 +20,7 @@ namespace SampleWebApiAspNetCore.Services
         {
             return new HouseEntity()
             {
-                Id = houseDto.Id == 0 ? Singleton.Instance.Houses.Max(x => x.Id) + 1 : houseDto.Id,
+                Id = houseDto.Id,
                 ZipCode = houseDto.ZipCode,
                 City = houseDto.City,
                 Street = houseDto.Street

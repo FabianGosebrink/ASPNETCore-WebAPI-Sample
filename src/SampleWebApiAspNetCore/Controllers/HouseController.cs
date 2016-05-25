@@ -1,130 +1,184 @@
-﻿using System.Linq;
-using Microsoft.AspNetCore.JsonPatch;
-using Microsoft.AspNetCore.Mvc;
-using SampleWebApiAspNetCore.Models;
-using SampleWebApiAspNetCore.Services;
+﻿using System;
+using System.Linq;
+using System.Net;
+using Microsoft.AspNet.Mvc;
+using SampleWebApiMVC6.Models;
+using SampleWebApiMVC6.Services;
+using Microsoft.AspNet.JsonPatch;
+using SampleWebApiAspNetCore.Repositories;
 
-namespace SampleWebApiAspNetCore.Controllers
+namespace SampleWebApiMVC6.Controllers
 {
     [Route("api/[controller]")]
     public class HouseController : Controller
     {
         private readonly IHouseMapper _houseMapper;
+        private readonly IHouseRepository _houseRepository;
 
-        public HouseController(IHouseMapper houseMapper)
+        public HouseController(IHouseMapper houseMapper, IHouseRepository houseRepository)
         {
             _houseMapper = houseMapper;
+            _houseRepository = houseRepository;
         }
 
         [HttpGet]
         public IActionResult Get()
         {
-            return new JsonResult(Singleton.Instance.Houses.Select(x => _houseMapper.MapToDto(x)));
+            try
+            {
+                return Ok(_houseRepository.GetAll().Select(x => _houseMapper.MapToDto(x)));
+            }
+            catch (Exception exception)
+            {
+                //logg exception or do anything with it
+                return new HttpStatusCodeResult((int) HttpStatusCode.InternalServerError);
+            }
         }
 
         [HttpGet("{id:int}", Name = "GetSingleHouse")]
         public IActionResult GetSingle(int id)
         {
-            HouseEntity houseEntity = Singleton.Instance.Houses.FirstOrDefault(x => x.Id == id);
-
-            if (houseEntity == null)
+            try
             {
-                return new NotFoundResult();
-            }
+                HouseEntity houseEntity = _houseRepository.GetSingle(id);
 
-            return new JsonResult(_houseMapper.MapToDto(houseEntity));
+                if (houseEntity == null)
+                {
+                    return new HttpNotFoundResult();
+                }
+
+                return Ok(_houseMapper.MapToDto(houseEntity));
+            }
+            catch (Exception exception)
+            {
+                //logg exception or do anything with it
+                return new HttpStatusCodeResult((int) HttpStatusCode.InternalServerError);
+            }
         }
 
-        [HttpPatch("{id}")]
-        public IActionResult Patch(int id, [FromBody] JsonPatchDocument<HouseEntity> housePatchDocument)
+        [HttpPatch]
+        public IActionResult Patch(int id, [FromBody] JsonPatchDocument<HouseDto> housePatchDocument)
         {
-            if (housePatchDocument == null)
+            try
             {
-                return BadRequest();
-            }
+                if (housePatchDocument == null)
+                {
+                    return HttpBadRequest();
+                }
 
-            if (!ModelState.IsValid)
+                if (!ModelState.IsValid)
+                {
+                    return HttpBadRequest(ModelState);
+                }
+
+                HouseEntity houseEntity = _houseRepository.GetSingle(id);
+
+                HouseDto existingHouse = _houseMapper.MapToDto(houseEntity);
+
+                housePatchDocument.ApplyTo(existingHouse, ModelState);
+
+                if (!ModelState.IsValid)
+                {
+                    return HttpBadRequest(ModelState);
+                }
+
+                _houseRepository.Update(_houseMapper.MapToEntity(existingHouse));
+
+                return Ok(existingHouse);
+            }
+            catch (Exception exception)
             {
-                return BadRequest(ModelState);
+                //logg exception or do anything with it
+                return new HttpStatusCodeResult((int) HttpStatusCode.InternalServerError);
             }
-
-            HouseEntity houseEntity = Singleton.Instance.Houses.FirstOrDefault(x => x.Id == id);
-
-            housePatchDocument.ApplyTo(houseEntity, ModelState);
-
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            int index = Singleton.Instance.Houses.FindIndex(x => x.Id == id);
-            Singleton.Instance.Houses[index] = houseEntity;
-
-            return new JsonResult(_houseMapper.MapToDto(houseEntity));
         }
 
         [HttpPost]
         public IActionResult Create([FromBody] HouseDto houseDto)
         {
-            if (houseDto == null)
+            try
             {
-                return new BadRequestResult();
-            }
+                if (houseDto == null)
+                {
+                    return new BadRequestResult();
+                }
 
-            if (!ModelState.IsValid)
+                if (!ModelState.IsValid)
+                {
+                    return HttpBadRequest(ModelState);
+                }
+
+                HouseEntity houseEntity = _houseMapper.MapToEntity(houseDto);
+
+                _houseRepository.Add(houseEntity);
+
+                return new CreatedAtRouteResult("GetSingleHouse", new { id = houseEntity.Id }, _houseMapper.MapToDto(houseEntity));
+            }
+            catch (Exception exception)
             {
-                return BadRequest(ModelState);
+                //logg exception or do anything with it
+                return new HttpStatusCodeResult((int) HttpStatusCode.InternalServerError);
             }
-
-            HouseEntity houseEntity = _houseMapper.MapToEntity(houseDto);
-
-            Singleton.Instance.Houses.Add(houseEntity);
-
-            return new CreatedAtRouteResult("GetSingleHouse", new { id = houseEntity.Id }, _houseMapper.MapToDto(houseEntity));
         }
 
         [HttpPut("{id:int}")]
         public IActionResult Update(int id, [FromBody] HouseDto houseDto)
         {
-            if (houseDto == null)
+            try
             {
-                return new BadRequestResult();
-            }
+                if (houseDto == null)
+                {
+                    return new BadRequestResult();
+                }
 
-            if (!ModelState.IsValid)
+                if (!ModelState.IsValid)
+                {
+                    return HttpBadRequest(ModelState);
+                }
+
+                HouseEntity houseEntityToUpdate = _houseRepository.GetSingle(id);
+
+                if (houseEntityToUpdate == null)
+                {
+                    return new HttpNotFoundResult();
+                }
+
+                houseEntityToUpdate.ZipCode = houseDto.ZipCode;
+                houseEntityToUpdate.Street = houseDto.Street;
+                houseEntityToUpdate.City = houseDto.City;
+
+                _houseRepository.Update(houseEntityToUpdate);
+
+                return Ok(_houseMapper.MapToDto(houseEntityToUpdate));
+            }
+            catch (Exception exception)
             {
-                return BadRequest(ModelState);
+                //logg exception or do anything with it
+                return new HttpStatusCodeResult((int) HttpStatusCode.InternalServerError);
             }
-
-            HouseEntity houseEntityToUpdate = Singleton.Instance.Houses.FirstOrDefault(x => x.Id == id);
-
-            if (houseEntityToUpdate == null)
-            {
-                return new NotFoundResult();
-            }
-
-            houseEntityToUpdate.ZipCode = houseDto.ZipCode;
-            houseEntityToUpdate.Street = houseDto.Street;
-            houseEntityToUpdate.City = houseDto.City;
-
-            //Update to Database --> Is singleton in this case....
-
-            return new JsonResult(_houseMapper.MapToDto(houseEntityToUpdate));
         }
 
         [HttpDelete("{id:int}")]
         public IActionResult Delete(int id)
         {
-            HouseEntity houseEntityToDelete = Singleton.Instance.Houses.FirstOrDefault(x => x.Id == id);
-
-            if (houseEntityToDelete == null)
+            try
             {
-                return new NotFoundResult();
+                HouseEntity houseEntityToDelete = _houseRepository.GetSingle(id);
+
+                if (houseEntityToDelete == null)
+                {
+                    return new HttpNotFoundResult();
+                }
+
+                _houseRepository.Delete(id);
+
+                return new NoContentResult();
             }
-
-            Singleton.Instance.Houses.Remove(houseEntityToDelete);
-
-            return new NoContentResult();
+            catch (Exception exception)
+            {
+                //logg exception or do anything with it
+                return new HttpStatusCodeResult((int) HttpStatusCode.InternalServerError);
+            }
         }
     }
 }
