@@ -1,7 +1,7 @@
 ﻿using System.Linq;
-using SampleWebApiMVC6.Models;
+using SampleWebApiAspNetCore.Models;
 
-namespace SampleWebApiMVC6.Services
+namespace SampleWebApiAspNetCore.Services
 {
     public class HouseMapper : IHouseMapper
     {

@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using SampleWebApiMVC6.Models;
+using SampleWebApiAspNetCore.Models;
 
-namespace SampleWebApiMVC6.Services 
+namespace SampleWebApiAspNetCore.Services 
 {
     public sealed class Singleton
     {

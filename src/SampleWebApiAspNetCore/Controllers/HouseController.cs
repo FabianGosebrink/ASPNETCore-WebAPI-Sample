@@ -1,13 +1,10 @@
-﻿using System;
-using System.Linq;
-using Microsoft.AspNet.Mvc;
-using Microsoft.AspNet.Mvc.ModelBinding;
-using SampleWebApiMVC6.Models;
-using SampleWebApiMVC6.Services;
-using System.Collections.Generic;
-using Microsoft.AspNet.JsonPatch;
+﻿using System.Linq;
+using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.AspNetCore.Mvc;
+using SampleWebApiAspNetCore.Models;
+using SampleWebApiAspNetCore.Services;
 
-namespace SampleWebApiMVC6.Controllers
+namespace SampleWebApiAspNetCore.Controllers
 {
     [Route("api/[controller]")]
     public class HouseController : Controller
@@ -32,7 +29,7 @@ namespace SampleWebApiMVC6.Controllers
 
             if (houseEntity == null)
             {
-                return new HttpNotFoundResult();
+                return new NotFoundResult();
             }
 
             return new JsonResult(_houseMapper.MapToDto(houseEntity));
@@ -43,12 +40,12 @@ namespace SampleWebApiMVC6.Controllers
         {
             if (housePatchDocument == null)
             {
-                return HttpBadRequest();
+                return BadRequest();
             }
 
             if (!ModelState.IsValid)
             {
-                return HttpBadRequest(ModelState);
+                return BadRequest(ModelState);
             }
 
             HouseEntity houseEntity = Singleton.Instance.Houses.FirstOrDefault(x => x.Id == id);
@@ -57,7 +54,7 @@ namespace SampleWebApiMVC6.Controllers
 
             if (!ModelState.IsValid)
             {
-                return HttpBadRequest(ModelState);
+                return BadRequest(ModelState);
             }
 
             int index = Singleton.Instance.Houses.FindIndex(x => x.Id == id);
@@ -76,7 +73,7 @@ namespace SampleWebApiMVC6.Controllers
 
             if (!ModelState.IsValid)
             {
-                return HttpBadRequest(ModelState);
+                return BadRequest(ModelState);
             }
 
             HouseEntity houseEntity = _houseMapper.MapToEntity(houseDto);
@@ -96,14 +93,14 @@ namespace SampleWebApiMVC6.Controllers
 
             if (!ModelState.IsValid)
             {
-                return HttpBadRequest(ModelState);
+                return BadRequest(ModelState);
             }
 
             HouseEntity houseEntityToUpdate = Singleton.Instance.Houses.FirstOrDefault(x => x.Id == id);
 
             if (houseEntityToUpdate == null)
             {
-                return new HttpNotFoundResult();
+                return new NotFoundResult();
             }
 
             houseEntityToUpdate.ZipCode = houseDto.ZipCode;
@@ -122,7 +119,7 @@ namespace SampleWebApiMVC6.Controllers
 
             if (houseEntityToDelete == null)
             {
-                return new HttpNotFoundResult();
+                return new NotFoundResult();
             }
 
             Singleton.Instance.Houses.Remove(houseEntityToDelete);

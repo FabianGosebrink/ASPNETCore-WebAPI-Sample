@@ -1,4 +1,4 @@
-﻿namespace SampleWebApiMVC6.Models
+﻿namespace SampleWebApiAspNetCore.Models
 {
     public class HouseEntity
     {

@@ -1,6 +1,6 @@
-using SampleWebApiMVC6.Models;
+using SampleWebApiAspNetCore.Models;
 
-namespace SampleWebApiMVC6.Services
+namespace SampleWebApiAspNetCore.Services
 {
     public interface IHouseMapper
     {
