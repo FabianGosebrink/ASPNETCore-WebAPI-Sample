@@ -6,7 +6,7 @@ This repository contains a controller which is dealing with houses. You can GET/
 
 Hope this helps.
 
-See the examples here:
+See the examples here: 
 
 ## GET all houses
 

@@ -7,7 +7,7 @@ using SampleWebApiAspNetCore.Models;
 using SampleWebApiAspNetCore.Repositories;
 using SampleWebApiAspNetCore.Services;
 
-namespace SampleWebApiMVC6.Controllers
+namespace SampleWebApiAspNetCore.Controllers
 {
     [Route("api/[controller]")]
     public class HouseController : Controller
