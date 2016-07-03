@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Linq;
 using System.Net;
-using Microsoft.AspNet.Mvc;
-using SampleWebApiMVC6.Models;
-using SampleWebApiMVC6.Services;
-using Microsoft.AspNet.JsonPatch;
+using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.AspNetCore.Mvc;
+using SampleWebApiAspNetCore.Models;
 using SampleWebApiAspNetCore.Repositories;
+using SampleWebApiAspNetCore.Services;
 
 namespace SampleWebApiMVC6.Controllers
 {
@@ -31,7 +31,7 @@ namespace SampleWebApiMVC6.Controllers
             catch (Exception exception)
             {
                 //logg exception or do anything with it
-                return new HttpStatusCodeResult((int) HttpStatusCode.InternalServerError);
+                return StatusCode((int) HttpStatusCode.InternalServerError);
             }
         }
 
@@ -44,7 +44,7 @@ namespace SampleWebApiMVC6.Controllers
 
                 if (houseEntity == null)
                 {
-                    return new HttpNotFoundResult();
+                    return NotFound();
                 }
 
                 return Ok(_houseMapper.MapToDto(houseEntity));
@@ -52,7 +52,7 @@ namespace SampleWebApiMVC6.Controllers
             catch (Exception exception)
             {
                 //logg exception or do anything with it
-                return new HttpStatusCodeResult((int) HttpStatusCode.InternalServerError);
+                return StatusCode((int)HttpStatusCode.InternalServerError);
             }
         }
 
@@ -63,15 +63,20 @@ namespace SampleWebApiMVC6.Controllers
             {
                 if (housePatchDocument == null)
                 {
-                    return HttpBadRequest();
+                    return BadRequest();
                 }
 
                 if (!ModelState.IsValid)
                 {
-                    return HttpBadRequest(ModelState);
+                    return BadRequest(ModelState);
                 }
 
                 HouseEntity houseEntity = _houseRepository.GetSingle(id);
+
+                if (houseEntity == null)
+                {
+                    return NotFound();
+                }
 
                 HouseDto existingHouse = _houseMapper.MapToDto(houseEntity);
 
@@ -79,7 +84,7 @@ namespace SampleWebApiMVC6.Controllers
 
                 if (!ModelState.IsValid)
                 {
-                    return HttpBadRequest(ModelState);
+                    return BadRequest(ModelState);
                 }
 
                 _houseRepository.Update(_houseMapper.MapToEntity(existingHouse));
@@ -89,7 +94,7 @@ namespace SampleWebApiMVC6.Controllers
             catch (Exception exception)
             {
                 //logg exception or do anything with it
-                return new HttpStatusCodeResult((int) HttpStatusCode.InternalServerError);
+                return StatusCode((int)HttpStatusCode.InternalServerError);
             }
         }
 
@@ -105,7 +110,7 @@ namespace SampleWebApiMVC6.Controllers
 
                 if (!ModelState.IsValid)
                 {
-                    return HttpBadRequest(ModelState);
+                    return BadRequest(ModelState);
                 }
 
                 HouseEntity houseEntity = _houseMapper.MapToEntity(houseDto);
@@ -117,7 +122,7 @@ namespace SampleWebApiMVC6.Controllers
             catch (Exception exception)
             {
                 //logg exception or do anything with it
-                return new HttpStatusCodeResult((int) HttpStatusCode.InternalServerError);
+                return StatusCode((int)HttpStatusCode.InternalServerError);
             }
         }
 
@@ -133,14 +138,14 @@ namespace SampleWebApiMVC6.Controllers
 
                 if (!ModelState.IsValid)
                 {
-                    return HttpBadRequest(ModelState);
+                    return BadRequest(ModelState);
                 }
 
                 HouseEntity houseEntityToUpdate = _houseRepository.GetSingle(id);
 
                 if (houseEntityToUpdate == null)
                 {
-                    return new HttpNotFoundResult();
+                    return NotFound();
                 }
 
                 houseEntityToUpdate.ZipCode = houseDto.ZipCode;
@@ -154,7 +159,7 @@ namespace SampleWebApiMVC6.Controllers
             catch (Exception exception)
             {
                 //logg exception or do anything with it
-                return new HttpStatusCodeResult((int) HttpStatusCode.InternalServerError);
+                return StatusCode((int)HttpStatusCode.InternalServerError);
             }
         }
 
@@ -167,7 +172,7 @@ namespace SampleWebApiMVC6.Controllers
 
                 if (houseEntityToDelete == null)
                 {
-                    return new HttpNotFoundResult();
+                    return NotFound();
                 }
 
                 _houseRepository.Delete(id);
@@ -177,7 +182,7 @@ namespace SampleWebApiMVC6.Controllers
             catch (Exception exception)
             {
                 //logg exception or do anything with it
-                return new HttpStatusCodeResult((int) HttpStatusCode.InternalServerError);
+                return StatusCode((int)HttpStatusCode.InternalServerError);
             }
         }
     }

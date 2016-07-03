@@ -16,11 +16,11 @@ namespace SampleWebApiAspNetCore
         public Startup(IHostingEnvironment env)
         {
             var builder = new ConfigurationBuilder()
-                .SetBasePath(env.ContentRootPath)
-                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
-                .AddEnvironmentVariables();
+               .SetBasePath(env.ContentRootPath)
+               .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+               .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true);
 
+            builder.AddEnvironmentVariables();
             Configuration = builder.Build();
         }
 
@@ -48,23 +48,13 @@ namespace SampleWebApiAspNetCore
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
-            loggerFactory.AddConsole();
+            loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
 
             app.UseDefaultFiles();
             app.UseStaticFiles();
 
             app.UseMvc();
-        }
-
-        //// Entry point for the application.
-        public static void Main(string[] args)
-        {
-            var host = WebHostBuilderIISExtensions.UseIISIntegration(WebHostBuilderExtensions.UseContentRoot(WebHostBuilderKestrelExtensions.UseKestrel(new WebHostBuilder()), Directory.GetCurrentDirectory()))
-                 .UseStartup<Startup>()
-                 .Build();
-
-            WebHostExtensions.Run(host);
         }
     }
 }
