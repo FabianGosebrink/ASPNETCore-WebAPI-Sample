@@ -105,7 +105,7 @@ namespace SampleWebApiAspNetCore.Controllers
             {
                 if (houseDto == null)
                 {
-                    return new BadRequestResult();
+                    return BadRequest();
                 }
 
                 if (!ModelState.IsValid)
@@ -116,8 +116,8 @@ namespace SampleWebApiAspNetCore.Controllers
                 HouseEntity houseEntity = _houseMapper.MapToEntity(houseDto);
 
                 _houseRepository.Add(houseEntity);
-
-                return new CreatedAtRouteResult("GetSingleHouse", new { id = houseEntity.Id }, _houseMapper.MapToDto(houseEntity));
+   
+                return CreatedAtRoute("GetSingleHouse", new { id = houseEntity.Id }, _houseMapper.MapToDto(houseEntity));
             }
             catch (Exception exception)
             {
@@ -133,7 +133,7 @@ namespace SampleWebApiAspNetCore.Controllers
             {
                 if (houseDto == null)
                 {
-                    return new BadRequestResult();
+                    return BadRequest();
                 }
 
                 if (!ModelState.IsValid)
@@ -177,7 +177,7 @@ namespace SampleWebApiAspNetCore.Controllers
 
                 _houseRepository.Delete(id);
 
-                return new NoContentResult();
+                return NoContent();
             }
             catch (Exception exception)
             {
