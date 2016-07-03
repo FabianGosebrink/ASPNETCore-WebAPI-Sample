@@ -56,7 +56,7 @@ namespace SampleWebApiMVC6.Controllers
             }
         }
 
-        [HttpPatch]
+        [HttpPatch("{id:int}")]
         public IActionResult Patch(int id, [FromBody] JsonPatchDocument<HouseDto> housePatchDocument)
         {
             try
