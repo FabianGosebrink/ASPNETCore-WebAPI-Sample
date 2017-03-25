@@ -24,7 +24,7 @@ See the examples here:
 
 ``` http://localhost:29435/api/house ```
 
-````javascript
+```javascript
   {
     "street": "MyNewStreet",
     "city": "MyHomeTown",
@@ -38,7 +38,7 @@ See the examples here:
 
 ``` http://localhost:29435/api/house/5 ```
 
-````javascript
+``` javascript
 {
     "id": 5,
     "street": "HAAALELUJAH",
@@ -54,7 +54,7 @@ See the examples here:
 
 ``` http://localhost:29435/api/house/4 ```
 
-````javascript
+``` javascript
 [
     { "op": "replace", "path": "/street", "value": "PatchStreet" }
 ]
