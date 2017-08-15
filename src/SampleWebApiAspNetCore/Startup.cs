@@ -15,18 +15,12 @@ namespace SampleWebApiAspNetCore
 {
     public class Startup
     {
-        public Startup(IHostingEnvironment env)
+        public Startup(IConfiguration configuration)
         {
-            var builder = new ConfigurationBuilder()
-               .SetBasePath(env.ContentRootPath)
-               .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-               .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true);
-
-            builder.AddEnvironmentVariables();
-            Configuration = builder.Build();
+            Configuration = configuration;
         }
 
-        public IConfigurationRoot Configuration { get; set; }
+        public IConfiguration Configuration { get; set; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -43,8 +37,9 @@ namespace SampleWebApiAspNetCore
                             .AllowAnyMethod();
                     });
             });
+
             services.AddSingleton<IHouseRepository, HouseRepository>();
-            services.AddScoped<ISeedDataService, SeedDataService>();
+            services.AddSingleton<ISeedDataService, SeedDataService>();
 
             // Add framework services.
             services.AddMvc();
