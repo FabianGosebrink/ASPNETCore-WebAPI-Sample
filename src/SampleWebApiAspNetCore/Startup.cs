@@ -5,8 +5,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SampleWebApiAspNetCore.Repositories;
-using SampleWebApiAspNetCore.Services;
 using Microsoft.AspNetCore.Http;
+using SampleWebApiAspNetCore.Models;
+using SampleWebApiAspNetCore.Entities;
+using SampleWebApiAspNetCore.Middleware;
+using SampleWebApiAspNetCore.Services;
 
 namespace SampleWebApiAspNetCore
 {
@@ -28,11 +31,23 @@ namespace SampleWebApiAspNetCore
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddOptions();
+            services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAllOrigins",
+                    builder =>
+                    {
+                        builder
+                            .AllowAnyOrigin()
+                            .AllowAnyHeader()
+                            .AllowAnyMethod();
+                    });
+            });
             services.AddSingleton<IHouseRepository, HouseRepository>();
-            services.AddTransient<IHouseMapper, HouseMapper>();
-            
+            services.AddScoped<ISeedDataService, SeedDataService>();
+
             // Add framework services.
-            services.AddMvcCore().AddJsonFormatters();
+            services.AddMvc();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -68,6 +83,15 @@ namespace SampleWebApiAspNetCore
             app.UseDefaultFiles();
             app.UseStaticFiles();
 
+            app.UseCors("AllowAllOrigins");
+            AutoMapper.Mapper.Initialize(mapper =>
+            {
+                mapper.CreateMap<HouseEntity, HouseDto>().ReverseMap();
+                mapper.CreateMap<HouseEntity, HouseCreateDto>().ReverseMap();
+                mapper.CreateMap<HouseEntity, HouseUpdateDto>().ReverseMap();
+            });
+
+            app.AddSeedData();
             app.UseMvc();
         }
     }

@@ -1,14 +1,16 @@
-﻿using System.Collections.Generic;
-using SampleWebApiAspNetCore.Models;
+﻿using SampleWebApiAspNetCore.Entities;
+using System.Linq;
 
 namespace SampleWebApiAspNetCore.Repositories
 {
     public interface IHouseRepository
     {
-        List<HouseEntity> GetAll();
-        HouseEntity GetSingle(int id);
-        HouseEntity Add(HouseEntity toAdd);
-        HouseEntity Update(HouseEntity toUpdate);
+        void Add(HouseEntity item);
         void Delete(int id);
+        IQueryable<HouseEntity> GetAll();
+        HouseEntity GetSingle(int id);
+        bool Save();
+        int Count();
+        void Update(HouseEntity item);
     }
 }

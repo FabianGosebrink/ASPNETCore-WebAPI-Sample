@@ -1,85 +1,96 @@
-﻿using System;
-using System.Linq;
-using System.Net;
+﻿using System.Linq;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using SampleWebApiAspNetCore.Models;
 using SampleWebApiAspNetCore.Repositories;
-using SampleWebApiAspNetCore.Services;
+using Newtonsoft.Json;
+using AutoMapper;
+using SampleWebApiAspNetCore.Entities;
+using System;
 
 namespace SampleWebApiAspNetCore.Controllers
 {
     [Route("api/[controller]")]
     public class HouseController : Controller
     {
-        private readonly IHouseMapper _houseMapper;
         private readonly IHouseRepository _houseRepository;
 
-        public HouseController(IHouseMapper houseMapper, IHouseRepository houseRepository)
+        public HouseController(IHouseRepository houseRepository)
         {
-            _houseMapper = houseMapper;
             _houseRepository = houseRepository;
         }
 
         [HttpGet]
-        public IActionResult Get()
+        public IActionResult GetAllHouses()
         {
-            return Ok(_houseRepository.GetAll().Select(x => _houseMapper.MapToDto(x)));
+            var allHouseEntitys = _houseRepository.GetAll().ToList();
+
+            var allHouseEntitysDto = allHouseEntitys.Select(x => Mapper.Map<HouseDto>(x));
+
+            Response.Headers.Add("X-Pagination",
+                JsonConvert.SerializeObject(new { totalCount = _houseRepository.Count() }));
+
+            return Ok(allHouseEntitysDto);
         }
 
         [HttpGet("{id:int}", Name = "GetSingleHouse")]
         public IActionResult GetSingle(int id)
         {
-            HouseEntity houseEntity = _houseRepository.GetSingle(id);
+            HouseEntity houseEntityFromRepo = _houseRepository.GetSingle(id);
 
-            if (houseEntity == null)
+            if (houseEntityFromRepo == null)
             {
                 return NotFound();
             }
 
-            return Ok(_houseMapper.MapToDto(houseEntity));
+            return Ok(Mapper.Map<HouseDto>(houseEntityFromRepo));
         }
 
         [HttpPatch("{id:int}")]
-        public IActionResult Patch(int id, [FromBody] JsonPatchDocument<HouseDto> housePatchDocument)
+        public IActionResult Patch(int id, [FromBody] JsonPatchDocument<HouseUpdateDto> housePatchDocument)
         {
             if (housePatchDocument == null)
             {
                 return BadRequest();
             }
 
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+            var existingHouse = _houseRepository.GetSingle(id);
 
-            HouseEntity houseEntity = _houseRepository.GetSingle(id);
-
-            if (houseEntity == null)
+            if (existingHouse == null)
             {
                 return NotFound();
             }
 
-            HouseDto existingHouse = _houseMapper.MapToDto(houseEntity);
+            var houseToPatch = Mapper.Map<HouseUpdateDto>(existingHouse);
+            housePatchDocument.ApplyTo(houseToPatch, ModelState);
 
-            housePatchDocument.ApplyTo(existingHouse, ModelState);
+            TryValidateModel(houseToPatch);
 
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            _houseRepository.Update(_houseMapper.MapToEntity(existingHouse));
+            Mapper.Map(houseToPatch, existingHouse);
 
-            return Ok(existingHouse);
+            _houseRepository.Update(existingHouse);
+
+            bool result = _houseRepository.Save();
+
+            if (!result)
+            {
+                throw new Exception($"something went wrong when updating the house with id: {id}");
+            }
+
+            return Ok(Mapper.Map<HouseDto>(existingHouse));
         }
 
         [HttpPost]
-        public IActionResult Create([FromBody] HouseDto houseDto)
+        public IActionResult Create([FromBody] HouseCreateDto houseDto)
         {
             if (houseDto == null)
             {
-                return BadRequest();
+                return BadRequest("HouseEntitycreate object was null");
             }
 
             if (!ModelState.IsValid)
@@ -87,53 +98,72 @@ namespace SampleWebApiAspNetCore.Controllers
                 return BadRequest(ModelState);
             }
 
-            HouseEntity houseEntity = _houseMapper.MapToEntity(houseDto);
+            HouseEntity toAdd = Mapper.Map<HouseEntity>(houseDto);
 
-            _houseRepository.Add(houseEntity);
+            _houseRepository.Add(toAdd);
 
-            return CreatedAtRoute("GetSingleHouse", new { id = houseEntity.Id }, _houseMapper.MapToDto(houseEntity));
+            bool result = _houseRepository.Save();
+
+            if (!result)
+            {
+                throw new Exception("something went wrong when adding a new House");
+            }
+            
+            return CreatedAtRoute("GetSingleHouse", new { id = toAdd.Id }, Mapper.Map<HouseDto>(toAdd));
         }
 
         [HttpPut("{id:int}")]
-        public IActionResult Update(int id, [FromBody] HouseDto houseDto)
+        public IActionResult Update(int id, [FromBody] HouseUpdateDto houseDto)
         {
             if (houseDto == null)
             {
                 return BadRequest();
             }
 
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+            var existingHouseEntity = _houseRepository.GetSingle(id);
 
-            HouseEntity houseEntityToUpdate = _houseRepository.GetSingle(id);
-
-            if (houseEntityToUpdate == null)
+            if (existingHouseEntity == null)
             {
                 return NotFound();
             }
 
-            houseEntityToUpdate.ZipCode = houseDto.ZipCode;
-            houseEntityToUpdate.Street = houseDto.Street;
-            houseEntityToUpdate.City = houseDto.City;
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
 
-            _houseRepository.Update(houseEntityToUpdate);
+            Mapper.Map(houseDto, existingHouseEntity);
 
-            return Ok(_houseMapper.MapToDto(houseEntityToUpdate));
+            _houseRepository.Update(existingHouseEntity);
+
+            bool result = _houseRepository.Save();
+
+            if (!result)
+            {
+                throw new Exception($"something went wrong when updating the house with id: {id}");
+            }
+
+            return Ok(Mapper.Map<HouseDto>(existingHouseEntity));
         }
 
         [HttpDelete("{id:int}")]
         public IActionResult Delete(int id)
         {
-            HouseEntity houseEntityToDelete = _houseRepository.GetSingle(id);
+            var existingHouseEntity = _houseRepository.GetSingle(id);
 
-            if (houseEntityToDelete == null)
+            if (existingHouseEntity == null)
             {
                 return NotFound();
             }
 
             _houseRepository.Delete(id);
+
+            bool result = _houseRepository.Save();
+
+            if (!result)
+            {
+                throw new Exception($"something went wrong when deleting the House with id: {id}");
+            }
 
             return NoContent();
         }
