@@ -1,24 +1,24 @@
 ﻿using SampleWebApiAspNetCore.Entities;
 using SampleWebApiAspNetCore.Repositories;
+using System;
 
 namespace SampleWebApiAspNetCore.Services
 {
     public class SeedDataService : ISeedDataService
     {
-        IHouseRepository _repository;
+        IFoodRepository _repository;
 
-
-        public SeedDataService(IHouseRepository repository)
+        public SeedDataService(IFoodRepository repository)
         {
             _repository = repository;
         }
 
         public void EnsureSeedData()
         {
-            _repository.Add(new HouseEntity() { City = "Town1", Id = 1, Street = "Street1", ZipCode = 1234 });
-            _repository.Add(new HouseEntity() { City = "Town2", Id = 2, Street = "Street2", ZipCode = 1234 });
-            _repository.Add(new HouseEntity() { City = "Town3", Id = 3, Street = "Street3", ZipCode = 1234 });
-            _repository.Add(new HouseEntity() { City = "Town4", Id = 4, Street = "Street4", ZipCode = 1234 });
+            _repository.Add(new FoodItem() { Calories = 1000, Id = 1, Name = "Lasagne", Created = DateTime.Now });
+            _repository.Add(new FoodItem() { Calories = 1100, Id = 2, Name = "Hamburger", Created = DateTime.Now });
+            _repository.Add(new FoodItem() { Calories = 1200, Id = 3, Name = "Spaghetti", Created = DateTime.Now });
+            _repository.Add(new FoodItem() { Calories = 1300, Id = 4, Name = "Pizza", Created = DateTime.Now });
         }
     }
 }
