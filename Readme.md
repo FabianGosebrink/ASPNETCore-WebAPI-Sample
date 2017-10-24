@@ -1,34 +1,41 @@
-# ASP.NET Core WebApi Sample
+# ASP.NET Core WebApi Sample with HATEOAS, Versioning & Swagger
 
 In this repository I want to give a plain starting point at how to build a WebAPI with ASP.NET Core.
 
-This repository contains a controller which is dealing with houses. You can GET/POST/PUT/PATCH and DELETE them.
+This repository contains a controller which is dealing with FoodItems. You can GET/POST/PUT/PATCH and DELETE them.
 
 Hope this helps.
 
 See the examples here: 
 
-## GET all houses
+## Versions
 
-``` http://localhost:29435/api/house ```
+``` http://localhost:29435/swagger ```
+
+![ASPNETCOREWebAPIVersions](./.github/versions.jpg)
+
+## GET all Foods
+
+``` http://localhost:29435/api/v1/foods ```
 
 ![ASPNETCOREWebAPIGET](./.github/get.jpg)
 
-## GET single house
+## GET single food
 
-``` http://localhost:29435/api/house/1 ```
+``` http://localhost:29435/api/v1/foods/2 ```
 
 ![ASPNETCOREWebAPIGET](./.github/getSingle.jpg)
 
-## POST a house
+## POST a foodItem
 
-``` http://localhost:29435/api/house ```
+``` http://localhost:29435/api/v1/foods ```
 
 ```javascript
   {
-    "street": "MyNewStreet",
-    "city": "MyHomeTown",
-    "zipCode": 1234
+      "name": "Lasagne",
+      "type": "Main",
+      "calories": 3000,
+      "created": "2017-09-16T17:50:08.1510899+02:00"
   }
 ```
 
@@ -36,14 +43,14 @@ See the examples here:
 
 ## PUT a house
 
-``` http://localhost:29435/api/house/5 ```
+``` http://localhost:29435/api/v1/foods/5 ```
 
 ``` javascript
 {
-    "id": 5,
-    "street": "HAAALELUJAH",
-    "city": "HAAALELUJAH-TOWN",
-    "zipCode": 1234657
+    "name": "Lasagne2",
+    "type": "Main",
+    "calories": 3000,
+    "created": "2017-09-16T17:50:08.1510899+02:00"
 }
 ```
 
@@ -52,11 +59,11 @@ See the examples here:
 
 ## PATCH a house
 
-``` http://localhost:29435/api/house/4 ```
+``` http://localhost:29435/api/v1/foods/5 ```
 
 ``` javascript
 [
-    { "op": "replace", "path": "/street", "value": "PatchStreet" }
+  { "op": "replace", "path": "/name", "value": "mynewname" }
 ]
 ```
 
@@ -64,7 +71,7 @@ See the examples here:
 
 ## DELETE a house
 
-``` http://localhost:29435/api/house ```
+``` http://localhost:29435/api/v1/foods/5 ```
 
 
 ![ASPNETCOREWebAPIGET](./.github/delete.jpg)
