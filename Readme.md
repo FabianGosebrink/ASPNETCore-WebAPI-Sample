@@ -41,7 +41,7 @@ See the examples here:
 
 ![ASPNETCOREWebAPIGET](./.github/post.jpg)
 
-## PUT a house
+## PUT a foodItem
 
 ``` http://localhost:29435/api/v1/foods/5 ```
 
@@ -57,7 +57,7 @@ See the examples here:
 ![ASPNETCOREWebAPIGET](./.github/put.jpg)
 
 
-## PATCH a house
+## PATCH a foodItem
 
 ``` http://localhost:29435/api/v1/foods/5 ```
 
@@ -69,7 +69,7 @@ See the examples here:
 
 ![ASPNETCOREWebAPIGET](./.github/patch.jpg)
 
-## DELETE a house
+## DELETE a foodItem
 
 ``` http://localhost:29435/api/v1/foods/5 ```
 
