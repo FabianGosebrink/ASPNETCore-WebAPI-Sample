@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 
-namespace SampleWebApiAspNetCore
+namespace WebApplication11
 {
     public class Program
     {
@@ -11,7 +11,7 @@ namespace SampleWebApiAspNetCore
         }
 
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
-           WebHost.CreateDefaultBuilder(args)
+            WebHost.CreateDefaultBuilder(args)
                 .UseStartup<Startup>();
     }
 }

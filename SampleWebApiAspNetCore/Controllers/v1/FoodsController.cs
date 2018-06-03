@@ -10,7 +10,7 @@ using SampleWebApiAspNetCore.Entities;
 using SampleWebApiAspNetCore.Models;
 using SampleWebApiAspNetCore.Helpers;
 
-namespace SampleWebApiAspNetCore.Controllers
+namespace SampleWebApiAspNetCore.v1.Controllers
 {
     [ApiVersion("1.0")]
     [Route("api/v{version:apiVersion}/[controller]")]
@@ -28,7 +28,7 @@ namespace SampleWebApiAspNetCore.Controllers
         }
 
         [HttpGet(Name = nameof(GetAllFoods))]
-        public IActionResult GetAllFoods([FromQuery] QueryParameters queryParameters)
+        public ActionResult<object> GetAllFoods([FromQuery] QueryParameters queryParameters)
         {
             List<FoodItem> foodItems = _foodRepository.GetAll(queryParameters).ToList();
 
@@ -58,7 +58,7 @@ namespace SampleWebApiAspNetCore.Controllers
 
         [HttpGet]
         [Route("{id:int}", Name = nameof(GetSingleFood))]
-        public IActionResult GetSingleFood(int id)
+        public ActionResult<OkObjectResult> GetSingleFood(int id)
         {
             FoodItem foodItem = _foodRepository.GetSingle(id);
 
@@ -71,7 +71,7 @@ namespace SampleWebApiAspNetCore.Controllers
         }
 
         [HttpPost(Name = nameof(AddFood))]
-        public IActionResult AddFood([FromBody] FoodCreateDto foodCreateDto)
+        public ActionResult<CreatedAtRouteResult> AddFood([FromBody] FoodCreateDto foodCreateDto)
         {
             if (foodCreateDto == null)
             {
@@ -99,7 +99,7 @@ namespace SampleWebApiAspNetCore.Controllers
         }
 
         [HttpPatch("{id:int}", Name = nameof(PartiallyUpdateFood))]
-        public IActionResult PartiallyUpdateFood(int id, [FromBody] JsonPatchDocument<FoodUpdateDto> patchDoc)
+        public ActionResult<OkObjectResult> PartiallyUpdateFood(int id, [FromBody] JsonPatchDocument<FoodUpdateDto> patchDoc)
         {
             if (patchDoc == null)
             {
@@ -136,7 +136,7 @@ namespace SampleWebApiAspNetCore.Controllers
 
         [HttpDelete]
         [Route("{id:int}", Name = nameof(RemoveFood))]
-        public IActionResult RemoveFood(int id)
+        public ActionResult<NoContentResult> RemoveFood(int id)
         {
             FoodItem foodItem = _foodRepository.GetSingle(id);
 
@@ -157,7 +157,7 @@ namespace SampleWebApiAspNetCore.Controllers
 
         [HttpPut]
         [Route("{id:int}", Name = nameof(UpdateFood))]
-        public IActionResult UpdateFood(int id, [FromBody]FoodUpdateDto foodUpdateDto)
+        public ActionResult<OkObjectResult> UpdateFood(int id, [FromBody]FoodUpdateDto foodUpdateDto)
         {
             if (foodUpdateDto == null)
             {
@@ -189,7 +189,7 @@ namespace SampleWebApiAspNetCore.Controllers
         }
 
         [HttpGet("GetRandomMeal", Name = nameof(GetRandomMeal))]
-        public IActionResult GetRandomMeal()
+        public ActionResult<object> GetRandomMeal()
         {
             ICollection<FoodItem> foodItems = _foodRepository.GetRandomMeal();
 
@@ -294,17 +294,6 @@ namespace SampleWebApiAspNetCore.Controllers
                "PUT"));
 
             return links;
-        }
-    }
-
-    [ApiVersion("2.0")]
-    [Route("api/v{version:apiVersion}/foods")]
-    public class Foods2Controller : ControllerBase
-    {
-        [HttpGet]
-        public IActionResult Get()
-        {
-            return Ok("2.0");
         }
     }
 }
