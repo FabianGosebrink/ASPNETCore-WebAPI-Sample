@@ -9,14 +9,14 @@ using System.Collections.Generic;
 using SampleWebApiAspNetCore.Entities;
 using SampleWebApiAspNetCore.Models;
 using SampleWebApiAspNetCore.Helpers;
-using Microsoft.AspNetCore.Authorization;
 
 namespace SampleWebApiAspNetCore.Controllers
 {
     [ApiVersion("1.0")]
     [Route("api/v{version:apiVersion}/[controller]")]
-    // [Route("api/[controller]")]
-    public class FoodsController : Controller
+    //[Route("api/[controller]")]
+    [ApiController]
+    public class FoodsController : ControllerBase
     {
         private readonly IFoodRepository _foodRepository;
         private readonly IUrlHelper _urlHelper;
@@ -93,7 +93,7 @@ namespace SampleWebApiAspNetCore.Controllers
             }
 
             FoodItem newFoodItem = _foodRepository.GetSingle(toAdd.Id);
-            
+
             return CreatedAtRoute(nameof(GetSingleFood), new { id = newFoodItem.Id },
                 Mapper.Map<FoodItemDto>(newFoodItem));
         }
@@ -299,7 +299,7 @@ namespace SampleWebApiAspNetCore.Controllers
 
     [ApiVersion("2.0")]
     [Route("api/v{version:apiVersion}/foods")]
-    public class Foods2Controller : Controller
+    public class Foods2Controller : ControllerBase
     {
         [HttpGet]
         public IActionResult Get()

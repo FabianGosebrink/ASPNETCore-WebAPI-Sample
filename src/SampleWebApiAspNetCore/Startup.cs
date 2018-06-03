@@ -1,5 +1,4 @@
-﻿using System;
-using SampleWebApiAspNetCore.Dtos;
+﻿using SampleWebApiAspNetCore.Dtos;
 using SampleWebApiAspNetCore.Entities;
 using SampleWebApiAspNetCore.Repositories;
 using Microsoft.AspNetCore.Builder;
@@ -16,7 +15,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Serialization;
 using Swashbuckle.AspNetCore.Swagger;
-using Swashbuckle.AspNetCore.SwaggerGen;
 using SampleWebApiAspNetCore.Middleware;
 using SampleWebApiAspNetCore.Services;
 
@@ -85,12 +83,13 @@ namespace SampleWebApiAspNetCore
                  config.ApiVersionReader = new HeaderApiVersionReader("api-version");
              });
              
-            services.AddMvcCore().AddVersionedApiExplorer(o => o.GroupNameFormat = "'v'VVV");
-            services.AddMvc().AddJsonOptions(options =>
+            services.AddMvcCore().AddVersionedApiExplorer(o => o.GroupNameFormat = "'v'VVV")
+                .SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            services.AddMvc()
+                .AddJsonOptions(options =>
             {
                 options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
-            });
-
+            }).SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -146,8 +145,8 @@ namespace SampleWebApiAspNetCore
                           mapper.CreateMap<FoodItem, FoodUpdateDto>().ReverseMap();
                           mapper.CreateMap<FoodItem, FoodCreateDto>().ReverseMap();
                       });
+            app.UseHttpsRedirection();
             app.UseMvc();
         }
-
     }
 }
