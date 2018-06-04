@@ -120,7 +120,6 @@ namespace WebApplication11
                 });
             }
 
-            var foodRepository = app.ApplicationServices.GetRequiredService<IFoodRepository>();
             app.AddSeedData();
 
             app.UseHttpsRedirection();
