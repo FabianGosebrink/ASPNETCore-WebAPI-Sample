@@ -28,7 +28,7 @@ namespace SampleWebApiAspNetCore.v1.Controllers
         }
 
         [HttpGet(Name = nameof(GetAllFoods))]
-        public ActionResult<object> GetAllFoods([FromQuery] QueryParameters queryParameters)
+        public ActionResult GetAllFoods([FromQuery] QueryParameters queryParameters)
         {
             List<FoodItem> foodItems = _foodRepository.GetAll(queryParameters).ToList();
 
@@ -58,7 +58,7 @@ namespace SampleWebApiAspNetCore.v1.Controllers
 
         [HttpGet]
         [Route("{id:int}", Name = nameof(GetSingleFood))]
-        public ActionResult<OkObjectResult> GetSingleFood(int id)
+        public ActionResult GetSingleFood(int id)
         {
             FoodItem foodItem = _foodRepository.GetSingle(id);
 
@@ -71,7 +71,7 @@ namespace SampleWebApiAspNetCore.v1.Controllers
         }
 
         [HttpPost(Name = nameof(AddFood))]
-        public ActionResult<CreatedAtRouteResult> AddFood([FromBody] FoodCreateDto foodCreateDto)
+        public ActionResult<FoodItemDto> AddFood([FromBody] FoodCreateDto foodCreateDto)
         {
             if (foodCreateDto == null)
             {
@@ -99,7 +99,7 @@ namespace SampleWebApiAspNetCore.v1.Controllers
         }
 
         [HttpPatch("{id:int}", Name = nameof(PartiallyUpdateFood))]
-        public ActionResult<OkObjectResult> PartiallyUpdateFood(int id, [FromBody] JsonPatchDocument<FoodUpdateDto> patchDoc)
+        public ActionResult<FoodItemDto> PartiallyUpdateFood(int id, [FromBody] JsonPatchDocument<FoodUpdateDto> patchDoc)
         {
             if (patchDoc == null)
             {
@@ -136,7 +136,7 @@ namespace SampleWebApiAspNetCore.v1.Controllers
 
         [HttpDelete]
         [Route("{id:int}", Name = nameof(RemoveFood))]
-        public ActionResult<NoContentResult> RemoveFood(int id)
+        public ActionResult RemoveFood(int id)
         {
             FoodItem foodItem = _foodRepository.GetSingle(id);
 
@@ -157,7 +157,7 @@ namespace SampleWebApiAspNetCore.v1.Controllers
 
         [HttpPut]
         [Route("{id:int}", Name = nameof(UpdateFood))]
-        public ActionResult<OkObjectResult> UpdateFood(int id, [FromBody]FoodUpdateDto foodUpdateDto)
+        public ActionResult<FoodItemDto> UpdateFood(int id, [FromBody]FoodUpdateDto foodUpdateDto)
         {
             if (foodUpdateDto == null)
             {
@@ -189,7 +189,7 @@ namespace SampleWebApiAspNetCore.v1.Controllers
         }
 
         [HttpGet("GetRandomMeal", Name = nameof(GetRandomMeal))]
-        public ActionResult<object> GetRandomMeal()
+        public ActionResult GetRandomMeal()
         {
             ICollection<FoodItem> foodItems = _foodRepository.GetRandomMeal();
 
@@ -254,6 +254,11 @@ namespace SampleWebApiAspNetCore.v1.Controllers
                     orderby = queryParameters.OrderBy
                 }), "previous", "GET"));
             }
+
+            links.Add(
+               new LinkDto(_urlHelper.Link(nameof(AddFood), null),
+               "create_food",
+               "POST"));
 
             return links;
         }

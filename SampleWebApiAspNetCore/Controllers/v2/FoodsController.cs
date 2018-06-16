@@ -7,7 +7,7 @@ namespace SampleWebApiAspNetCore.v2.Controllers
     public class FoodsController : ControllerBase
     {
         [HttpGet]
-        public ActionResult<OkObjectResult> Get()
+        public ActionResult Get()
         {
             return Ok("2.0");
         }
