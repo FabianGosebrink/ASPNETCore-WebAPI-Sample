@@ -1,9 +1,10 @@
-﻿using System.Threading.Tasks;
+﻿using SampleWebApiAspNetCore.Repositories;
+using System.Threading.Tasks;
 
 namespace SampleWebApiAspNetCore.Services
 {
     public interface ISeedDataService
     {
-        void EnsureSeedData();
+        Task Initialize(FoodDbContext context);
     }
 }

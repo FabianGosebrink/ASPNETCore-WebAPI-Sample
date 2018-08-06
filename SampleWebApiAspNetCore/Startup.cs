@@ -1,24 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.AspNetCore.Mvc.Versioning;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using SampleWebApiAspNetCore.Dtos;
 using SampleWebApiAspNetCore.Entities;
-using SampleWebApiAspNetCore.Middleware;
 using SampleWebApiAspNetCore.Repositories;
 using SampleWebApiAspNetCore.Services;
 using Swashbuckle.AspNetCore.Swagger;
@@ -38,7 +32,7 @@ namespace WebApplication11
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddOptions();
-
+            services.AddDbContext<FoodDbContext>(opt => opt.UseInMemoryDatabase("FoodDatabase"));
             services.AddCors(options =>
             {
                 options.AddPolicy("AllowAllOrigins",
@@ -52,7 +46,7 @@ namespace WebApplication11
             });
 
             services.AddSingleton<ISeedDataService, SeedDataService>();
-            services.AddSingleton<IFoodRepository, FoodRepository>();
+            services.AddScoped<IFoodRepository, EfFoodRepository>();
             services.AddRouting(options => options.LowercaseUrls = true);
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
             services.AddScoped<IUrlHelper>(implementationFactory =>
@@ -120,7 +114,7 @@ namespace WebApplication11
                 });
             }
 
-            app.AddSeedData();
+            //app.AddSeedData();
 
             app.UseHttpsRedirection();
 

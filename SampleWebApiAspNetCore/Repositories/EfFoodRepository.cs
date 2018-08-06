@@ -1,53 +1,48 @@
+﻿using SampleWebApiAspNetCore.Entities;
+using SampleWebApiAspNetCore.Helpers;
+using SampleWebApiAspNetCore.Models;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using SampleWebApiAspNetCore.Entities;
-using SampleWebApiAspNetCore.Models;
 using System.Linq.Dynamic.Core;
-using SampleWebApiAspNetCore.Helpers;
 
 namespace SampleWebApiAspNetCore.Repositories
 {
-    public class FoodRepository : IFoodRepository
+    public class EfFoodRepository : IFoodRepository
     {
-        private readonly ConcurrentDictionary<int, FoodItem> _storage = new ConcurrentDictionary<int, FoodItem>();
+        private readonly FoodDbContext _foodDbContext;
+
+        public EfFoodRepository(FoodDbContext foodDbContext)
+        {
+            _foodDbContext = foodDbContext;
+        }
 
         public FoodItem GetSingle(int id)
         {
-            FoodItem foodItem;
-            return _storage.TryGetValue(id, out foodItem) ? foodItem : null;
+            return _foodDbContext.FoodItems.FirstOrDefault(x => x.Id == id);
         }
 
         public void Add(FoodItem item)
         {
-            item.Id = !_storage.Values.Any() ? 1 : _storage.Values.Max(x => x.Id) + 1;
-
-            if (!_storage.TryAdd(item.Id, item))
-            {
-                throw new Exception("Item could not be added");
-            }
+            _foodDbContext.FoodItems.Add(item);
         }
 
         public void Delete(int id)
         {
-            FoodItem foodItem;
-            if (!_storage.TryRemove(id, out foodItem))
-            {
-                throw new Exception("Item could not be removed");
-            }
+            FoodItem foodItem = GetSingle(id);
+            _foodDbContext.FoodItems.Remove(foodItem);
         }
 
         public FoodItem Update(int id, FoodItem item)
         {
-            _storage.TryUpdate(id, item, GetSingle(id));
+            _foodDbContext.FoodItems.Update(item);
             return item;
         }
 
         public IQueryable<FoodItem> GetAll(QueryParameters queryParameters)
         {
-            IQueryable<FoodItem> _allItems = _storage.Values.AsQueryable().OrderBy(queryParameters.OrderBy,
-               queryParameters.IsDescending());
+            IQueryable<FoodItem> _allItems = _foodDbContext.FoodItems.OrderBy(queryParameters.OrderBy,
+              queryParameters.IsDescending());
 
             if (queryParameters.HasQuery())
             {
@@ -61,6 +56,16 @@ namespace SampleWebApiAspNetCore.Repositories
                 .Take(queryParameters.PageCount);
         }
 
+        public int Count()
+        {
+            return _foodDbContext.FoodItems.Count();
+        }
+
+        public bool Save()
+        {
+            return (_foodDbContext.SaveChanges() >= 0);
+        }
+
         public ICollection<FoodItem> GetRandomMeal()
         {
             List<FoodItem> toReturn = new List<FoodItem>();
@@ -72,19 +77,9 @@ namespace SampleWebApiAspNetCore.Repositories
             return toReturn;
         }
 
-        public int Count()
-        {
-            return _storage.Count;
-        }
-
-        public bool Save()
-        {
-            // To keep interface consistent with Controllers, Tests & EF Interfaces
-            return true;
-        }
         private FoodItem GetRandomItem(string type)
         {
-            return _storage.Values
+            return _foodDbContext.FoodItems
                 .Where(x => x.Type == type)
                 .OrderBy(o => Guid.NewGuid())
                 .FirstOrDefault();
