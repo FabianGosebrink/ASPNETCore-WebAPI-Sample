@@ -54,7 +54,8 @@ namespace WebApplication11
                 var actionContext = implementationFactory.GetService<IActionContextAccessor>().ActionContext;
                 return new UrlHelper(actionContext);
             });
-
+            // https://github.com/aspnet/AspNetCore/issues/3485
+            services.Configure<ApiBehaviorOptions>(opt =>{opt.SuppressModelStateInvalidFilter = true;});
             services.AddMvcCore().AddVersionedApiExplorer(o => o.GroupNameFormat = "'v'VVV");
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
             services.AddApiVersioning(config =>
