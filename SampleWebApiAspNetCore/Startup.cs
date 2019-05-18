@@ -11,11 +11,13 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using SampleWebApiAspNetCore.Dtos;
 using SampleWebApiAspNetCore.Entities;
 using SampleWebApiAspNetCore.Repositories;
 using SampleWebApiAspNetCore.Services;
 using Swashbuckle.AspNetCore.Swagger;
+using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace WebApplication11
 {
@@ -55,8 +57,8 @@ namespace WebApplication11
                 return new UrlHelper(actionContext);
             });
 
-            services.AddMvcCore().AddVersionedApiExplorer(o => o.GroupNameFormat = "'v'VVV");
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
             services.AddApiVersioning(config =>
             {
                 config.ReportApiVersions = true;
@@ -64,31 +66,16 @@ namespace WebApplication11
                 config.DefaultApiVersion = new ApiVersion(1, 0);
                 config.ApiVersionReader = new HeaderApiVersionReader("api-version");
             });
-            services.AddSwaggerGen(
-                options =>
-                {
-                    var provider = services.BuildServiceProvider()
-                                        .GetRequiredService<IApiVersionDescriptionProvider>();
 
-                    foreach (var description in provider.ApiVersionDescriptions)
-                    {
-                        options.SwaggerDoc(
-                            description.GroupName,
-                            new Info()
-                            {
-                                Title = $"Sample API {description.ApiVersion}",
-                                Version = description.ApiVersion.ToString()
-                            });
-                    }
-                });
+            services.AddVersionedApiExplorer(o => o.GroupNameFormat = "'v'VVV");
+            services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();
+            services.AddSwaggerGen();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory, 
             IHostingEnvironment env, IApiVersionDescriptionProvider provider)
         {
-            loggerFactory.AddConsole();
-
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -114,9 +101,17 @@ namespace WebApplication11
                 });
             }
 
-            //app.AddSeedData();
-
             app.UseHttpsRedirection();
+
+            app.UseCors("AllowAllOrigins");
+            AutoMapper.Mapper.Initialize(mapper =>
+            {
+                mapper.CreateMap<FoodItem, FoodItemDto>().ReverseMap();
+                mapper.CreateMap<FoodItem, FoodUpdateDto>().ReverseMap();
+                mapper.CreateMap<FoodItem, FoodCreateDto>().ReverseMap();
+            });
+
+            app.UseMvc();
 
             app.UseSwagger();
             app.UseSwaggerUI(
@@ -129,16 +124,28 @@ namespace WebApplication11
                             description.GroupName.ToUpperInvariant());
                     }
                 });
+        }
+    }
 
-            app.UseCors("AllowAllOrigins");
-            AutoMapper.Mapper.Initialize(mapper =>
+    public class ConfigureSwaggerOptions : IConfigureOptions<SwaggerGenOptions>
+    {
+        readonly IApiVersionDescriptionProvider provider;
+
+        public ConfigureSwaggerOptions(IApiVersionDescriptionProvider provider) =>
+          this.provider = provider;
+
+        public void Configure(SwaggerGenOptions options)
+        {
+            foreach (var description in provider.ApiVersionDescriptions)
             {
-                mapper.CreateMap<FoodItem, FoodItemDto>().ReverseMap();
-                mapper.CreateMap<FoodItem, FoodUpdateDto>().ReverseMap();
-                mapper.CreateMap<FoodItem, FoodCreateDto>().ReverseMap();
-            });
-
-            app.UseMvc();
+                options.SwaggerDoc(
+                  description.GroupName,
+                    new Info()
+                    {
+                        Title = $"Sample API {description.ApiVersion}",
+                        Version = description.ApiVersion.ToString(),
+                    });
+            }
         }
     }
 }

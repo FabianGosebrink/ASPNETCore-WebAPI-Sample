@@ -78,11 +78,6 @@ namespace SampleWebApiAspNetCore.v1.Controllers
                 return BadRequest();
             }
 
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
             FoodItem toAdd = Mapper.Map<FoodItem>(foodCreateDto);
 
             _foodRepository.Add(toAdd);
@@ -169,11 +164,6 @@ namespace SampleWebApiAspNetCore.v1.Controllers
             if (existingFoodItem == null)
             {
                 return NotFound();
-            }
-
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
             }
 
             Mapper.Map(foodUpdateDto, existingFoodItem);
