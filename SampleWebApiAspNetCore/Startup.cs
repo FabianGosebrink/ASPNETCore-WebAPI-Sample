@@ -51,10 +51,11 @@ namespace WebApplication11
             services.AddScoped<IFoodRepository, EfFoodRepository>();
             services.AddRouting(options => options.LowercaseUrls = true);
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
-            services.AddScoped<IUrlHelper>(implementationFactory =>
+            services.AddScoped<IUrlHelper>(x =>
             {
-                var actionContext = implementationFactory.GetService<IActionContextAccessor>().ActionContext;
-                return new UrlHelper(actionContext);
+                var actionContext = x.GetRequiredService<IActionContextAccessor>().ActionContext;
+                var factory = x.GetRequiredService<IUrlHelperFactory>();
+                return factory.GetUrlHelper(actionContext);
             });
 
             
@@ -68,8 +69,23 @@ namespace WebApplication11
             });
 
             services.AddVersionedApiExplorer(o => o.GroupNameFormat = "'v'VVV");
-            services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();
-            services.AddSwaggerGen();
+            services.AddSwaggerGen(
+               options =>
+               {
+                   var provider = services.BuildServiceProvider()
+                                       .GetRequiredService<IApiVersionDescriptionProvider>();
+
+                   foreach (var description in provider.ApiVersionDescriptions)
+                   {
+                       options.SwaggerDoc(
+                           description.GroupName,
+                           new Info()
+                           {
+                               Title = $"Sample API {description.ApiVersion}",
+                               Version = description.ApiVersion.ToString()
+                           });
+                   }
+               });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -124,28 +140,6 @@ namespace WebApplication11
                             description.GroupName.ToUpperInvariant());
                     }
                 });
-        }
-    }
-
-    public class ConfigureSwaggerOptions : IConfigureOptions<SwaggerGenOptions>
-    {
-        readonly IApiVersionDescriptionProvider provider;
-
-        public ConfigureSwaggerOptions(IApiVersionDescriptionProvider provider) =>
-          this.provider = provider;
-
-        public void Configure(SwaggerGenOptions options)
-        {
-            foreach (var description in provider.ApiVersionDescriptions)
-            {
-                options.SwaggerDoc(
-                  description.GroupName,
-                    new Info()
-                    {
-                        Title = $"Sample API {description.ApiVersion}",
-                        Version = description.ApiVersion.ToString(),
-                    });
-            }
         }
     }
 }

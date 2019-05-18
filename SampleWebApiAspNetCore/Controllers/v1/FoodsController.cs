@@ -12,10 +12,10 @@ using SampleWebApiAspNetCore.Helpers;
 
 namespace SampleWebApiAspNetCore.v1.Controllers
 {
+    [ApiController]
     [ApiVersion("1.0")]
     [Route("api/v{version:apiVersion}/[controller]")]
     //[Route("api/[controller]")]
-    [ApiController]
     public class FoodsController : ControllerBase
     {
         private readonly IFoodRepository _foodRepository;
@@ -203,13 +203,12 @@ namespace SampleWebApiAspNetCore.v1.Controllers
             var links = new List<LinkDto>();
 
             // self 
-            links.Add(
-             new LinkDto(_urlHelper.Link(nameof(GetAllFoods), new
-             {
-                 pagecount = queryParameters.PageCount,
-                 page = queryParameters.Page,
-                 orderby = queryParameters.OrderBy
-             }), "self", "GET"));
+            links.Add(new LinkDto(_urlHelper.Link(nameof(GetAllFoods), new
+            {
+                pagecount = queryParameters.PageCount,
+                page = queryParameters.Page,
+                orderby = queryParameters.OrderBy
+            }), "self", "GET"));
 
             links.Add(new LinkDto(_urlHelper.Link(nameof(GetAllFoods), new
             {
