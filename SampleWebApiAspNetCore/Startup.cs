@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -10,14 +11,12 @@ using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using SampleWebApiAspNetCore.Dtos;
-using SampleWebApiAspNetCore.Entities;
+using Microsoft.OpenApi.Models;
+using SampleWebApiAspNetCore.MappingProfiles;
 using SampleWebApiAspNetCore.Repositories;
 using SampleWebApiAspNetCore.Services;
-using Swashbuckle.AspNetCore.Swagger;
-using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace WebApplication11
 {
@@ -59,7 +58,10 @@ namespace WebApplication11
             });
 
             
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            services.AddControllers()
+                .AddNewtonsoftJson()
+                .SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
+
             services.AddApiVersioning(config =>
             {
                 config.ReportApiVersions = true;
@@ -72,25 +74,27 @@ namespace WebApplication11
             services.AddSwaggerGen(
                options =>
                {
-                   var provider = services.BuildServiceProvider()
-                                       .GetRequiredService<IApiVersionDescriptionProvider>();
+                   ServiceProvider serviceProvider = services.BuildServiceProvider();
+                   var provider = serviceProvider.GetRequiredService<IApiVersionDescriptionProvider>();
 
                    foreach (var description in provider.ApiVersionDescriptions)
                    {
                        options.SwaggerDoc(
                            description.GroupName,
-                           new Info()
+                           new OpenApiInfo()
                            {
                                Title = $"Sample API {description.ApiVersion}",
                                Version = description.ApiVersion.ToString()
                            });
                    }
                });
+
+            services.AddAutoMapper(typeof(FoodMappings));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory, 
-            IHostingEnvironment env, IApiVersionDescriptionProvider provider)
+            IWebHostEnvironment env, IApiVersionDescriptionProvider provider)
         {
             if (env.IsDevelopment())
             {
@@ -118,16 +122,13 @@ namespace WebApplication11
             }
 
             app.UseHttpsRedirection();
-
+            app.UseRouting();
             app.UseCors("AllowAllOrigins");
-            AutoMapper.Mapper.Initialize(mapper =>
-            {
-                mapper.CreateMap<FoodItem, FoodItemDto>().ReverseMap();
-                mapper.CreateMap<FoodItem, FoodUpdateDto>().ReverseMap();
-                mapper.CreateMap<FoodItem, FoodCreateDto>().ReverseMap();
-            });
 
-            app.UseMvc();
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+            });
 
             app.UseSwagger();
             app.UseSwaggerUI(

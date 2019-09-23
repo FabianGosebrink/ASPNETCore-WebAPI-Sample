@@ -20,10 +20,15 @@ namespace SampleWebApiAspNetCore.v1.Controllers
     {
         private readonly IFoodRepository _foodRepository;
         private readonly IUrlHelper _urlHelper;
+        private readonly IMapper _mapper;
 
-        public FoodsController(IUrlHelper urlHelper, IFoodRepository foodRepository)
+        public FoodsController(
+            IUrlHelper urlHelper, 
+            IFoodRepository foodRepository,
+            IMapper mapper)
         {
             _foodRepository = foodRepository;
+            _mapper = mapper;
             _urlHelper = urlHelper;
         }
 
@@ -78,7 +83,7 @@ namespace SampleWebApiAspNetCore.v1.Controllers
                 return BadRequest();
             }
 
-            FoodItem toAdd = Mapper.Map<FoodItem>(foodCreateDto);
+            FoodItem toAdd = _mapper.Map<FoodItem>(foodCreateDto);
 
             _foodRepository.Add(toAdd);
 
@@ -90,7 +95,7 @@ namespace SampleWebApiAspNetCore.v1.Controllers
             FoodItem newFoodItem = _foodRepository.GetSingle(toAdd.Id);
 
             return CreatedAtRoute(nameof(GetSingleFood), new { id = newFoodItem.Id },
-                Mapper.Map<FoodItemDto>(newFoodItem));
+                _mapper.Map<FoodItemDto>(newFoodItem));
         }
 
         [HttpPatch("{id:int}", Name = nameof(PartiallyUpdateFood))]
@@ -108,8 +113,8 @@ namespace SampleWebApiAspNetCore.v1.Controllers
                 return NotFound();
             }
 
-            FoodUpdateDto foodUpdateDto = Mapper.Map<FoodUpdateDto>(existingEntity);
-            patchDoc.ApplyTo(foodUpdateDto, ModelState);
+            FoodUpdateDto foodUpdateDto = _mapper.Map<FoodUpdateDto>(existingEntity);
+            patchDoc.ApplyTo(foodUpdateDto);
 
             TryValidateModel(foodUpdateDto);
 
@@ -118,7 +123,7 @@ namespace SampleWebApiAspNetCore.v1.Controllers
                 return BadRequest(ModelState);
             }
 
-            Mapper.Map(foodUpdateDto, existingEntity);
+            _mapper.Map(foodUpdateDto, existingEntity);
             FoodItem updated = _foodRepository.Update(id, existingEntity);
 
             if (!_foodRepository.Save())
@@ -126,7 +131,7 @@ namespace SampleWebApiAspNetCore.v1.Controllers
                 throw new Exception("Updating a fooditem failed on save.");
             }
 
-            return Ok(Mapper.Map<FoodItemDto>(updated));
+            return Ok(_mapper.Map<FoodItemDto>(updated));
         }
 
         [HttpDelete]
@@ -166,7 +171,7 @@ namespace SampleWebApiAspNetCore.v1.Controllers
                 return NotFound();
             }
 
-            Mapper.Map(foodUpdateDto, existingFoodItem);
+            _mapper.Map(foodUpdateDto, existingFoodItem);
 
             _foodRepository.Update(id, existingFoodItem);
 
@@ -175,7 +180,7 @@ namespace SampleWebApiAspNetCore.v1.Controllers
                 throw new Exception("Updating a fooditem failed on save.");
             }
 
-            return Ok(Mapper.Map<FoodItemDto>(existingFoodItem));
+            return Ok(_mapper.Map<FoodItemDto>(existingFoodItem));
         }
 
         [HttpGet("GetRandomMeal", Name = nameof(GetRandomMeal))]
@@ -184,7 +189,7 @@ namespace SampleWebApiAspNetCore.v1.Controllers
             ICollection<FoodItem> foodItems = _foodRepository.GetRandomMeal();
 
             IEnumerable<FoodItemDto> dtos = foodItems
-                .Select(x => Mapper.Map<FoodItemDto>(x));
+                .Select(x => _mapper.Map<FoodItemDto>(x));
 
             var links = new List<LinkDto>();
 
@@ -255,7 +260,7 @@ namespace SampleWebApiAspNetCore.v1.Controllers
         private dynamic ExpandSingleFoodItem(FoodItem foodItem)
         {
             var links = GetLinks(foodItem.Id);
-            FoodItemDto item = Mapper.Map<FoodItemDto>(foodItem);
+            FoodItemDto item = _mapper.Map<FoodItemDto>(foodItem);
 
             var resourceToReturn = item.ToDynamic() as IDictionary<string, object>;
             resourceToReturn.Add("links", links);
