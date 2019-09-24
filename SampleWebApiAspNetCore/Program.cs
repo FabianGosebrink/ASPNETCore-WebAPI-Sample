@@ -7,7 +7,7 @@ using SampleWebApiAspNetCore.Repositories;
 using SampleWebApiAspNetCore.Services;
 using System;
 
-namespace WebApplication11
+namespace SampleWebApiAspNetCore
 {
     public class Program
     {

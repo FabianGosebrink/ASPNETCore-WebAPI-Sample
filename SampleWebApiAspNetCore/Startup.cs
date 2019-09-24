@@ -13,12 +13,14 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using SampleWebApiAspNetCore.MappingProfiles;
 using SampleWebApiAspNetCore.Repositories;
 using SampleWebApiAspNetCore.Services;
+using Swashbuckle.AspNetCore.SwaggerGen;
 
-namespace WebApplication11
+namespace SampleWebApiAspNetCore
 {
     public class Startup
     {
@@ -47,7 +49,7 @@ namespace WebApplication11
             });
 
             services.AddSingleton<ISeedDataService, SeedDataService>();
-            services.AddScoped<IFoodRepository, EfFoodRepository>();
+            services.AddScoped<IFoodRepository, FoodSqlRepository>();
             services.AddRouting(options => options.LowercaseUrls = true);
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
             services.AddScoped<IUrlHelper>(x =>
@@ -62,32 +64,25 @@ namespace WebApplication11
                 .AddNewtonsoftJson()
                 .SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
 
-            services.AddApiVersioning(config =>
-            {
-                config.ReportApiVersions = true;
-                config.AssumeDefaultVersionWhenUnspecified = true;
-                config.DefaultApiVersion = new ApiVersion(1, 0);
-                config.ApiVersionReader = new HeaderApiVersionReader("api-version");
-            });
+             services.AddApiVersioning(
+                config =>
+                {
+                    config.ReportApiVersions = true;
+                    config.AssumeDefaultVersionWhenUnspecified = true;
+                    config.DefaultApiVersion = new ApiVersion(1, 0);
+                    config.ApiVersionReader = new HeaderApiVersionReader("api-version");
+                });
+            services.AddVersionedApiExplorer(
+                options =>
+                {
+                    options.GroupNameFormat = "'v'VVV";
 
-            services.AddVersionedApiExplorer(o => o.GroupNameFormat = "'v'VVV");
-            services.AddSwaggerGen(
-               options =>
-               {
-                   ServiceProvider serviceProvider = services.BuildServiceProvider();
-                   var provider = serviceProvider.GetRequiredService<IApiVersionDescriptionProvider>();
-
-                   foreach (var description in provider.ApiVersionDescriptions)
-                   {
-                       options.SwaggerDoc(
-                           description.GroupName,
-                           new OpenApiInfo()
-                           {
-                               Title = $"Sample API {description.ApiVersion}",
-                               Version = description.ApiVersion.ToString()
-                           });
-                   }
-               });
+                    // note: this option is only necessary when versioning by url segment. the SubstitutionFormat
+                    // can also be used to control the format of the API version in route templates
+                    options.SubstituteApiVersionInUrl = true;
+                });
+            services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();
+            services.AddSwaggerGen();
 
             services.AddAutoMapper(typeof(FoodMappings));
         }

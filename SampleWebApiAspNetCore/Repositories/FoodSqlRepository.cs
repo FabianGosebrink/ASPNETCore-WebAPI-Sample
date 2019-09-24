@@ -8,11 +8,11 @@ using System.Linq.Dynamic.Core;
 
 namespace SampleWebApiAspNetCore.Repositories
 {
-    public class EfFoodRepository : IFoodRepository
+    public class FoodSqlRepository : IFoodRepository
     {
         private readonly FoodDbContext _foodDbContext;
 
-        public EfFoodRepository(FoodDbContext foodDbContext)
+        public FoodSqlRepository(FoodDbContext foodDbContext)
         {
             _foodDbContext = foodDbContext;
         }
