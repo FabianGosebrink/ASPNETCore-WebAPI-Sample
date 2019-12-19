@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace SampleWebApiAspNetCore.Entities
+namespace SampleWebApiAspNetCore.Dtos
 {
-    public class FoodItem
+    public class FoodDto
     {
         public int Id { get; set; }
         public string Name { get; set; }

@@ -17,31 +17,31 @@ namespace SampleWebApiAspNetCore.Repositories
             _foodDbContext = foodDbContext;
         }
 
-        public FoodItem GetSingle(int id)
+        public FoodEntity GetSingle(int id)
         {
             return _foodDbContext.FoodItems.FirstOrDefault(x => x.Id == id);
         }
 
-        public void Add(FoodItem item)
+        public void Add(FoodEntity item)
         {
             _foodDbContext.FoodItems.Add(item);
         }
 
         public void Delete(int id)
         {
-            FoodItem foodItem = GetSingle(id);
+            FoodEntity foodItem = GetSingle(id);
             _foodDbContext.FoodItems.Remove(foodItem);
         }
 
-        public FoodItem Update(int id, FoodItem item)
+        public FoodEntity Update(int id, FoodEntity item)
         {
             _foodDbContext.FoodItems.Update(item);
             return item;
         }
 
-        public IQueryable<FoodItem> GetAll(QueryParameters queryParameters)
+        public IQueryable<FoodEntity> GetAll(QueryParameters queryParameters)
         {
-            IQueryable<FoodItem> _allItems = _foodDbContext.FoodItems.OrderBy(queryParameters.OrderBy,
+            IQueryable<FoodEntity> _allItems = _foodDbContext.FoodItems.OrderBy(queryParameters.OrderBy,
               queryParameters.IsDescending());
 
             if (queryParameters.HasQuery())
@@ -66,9 +66,9 @@ namespace SampleWebApiAspNetCore.Repositories
             return (_foodDbContext.SaveChanges() >= 0);
         }
 
-        public ICollection<FoodItem> GetRandomMeal()
+        public ICollection<FoodEntity> GetRandomMeal()
         {
-            List<FoodItem> toReturn = new List<FoodItem>();
+            List<FoodEntity> toReturn = new List<FoodEntity>();
 
             toReturn.Add(GetRandomItem("Starter"));
             toReturn.Add(GetRandomItem("Main"));
@@ -77,7 +77,7 @@ namespace SampleWebApiAspNetCore.Repositories
             return toReturn;
         }
 
-        private FoodItem GetRandomItem(string type)
+        private FoodEntity GetRandomItem(string type)
         {
             return _foodDbContext.FoodItems
                 .Where(x => x.Type == type)

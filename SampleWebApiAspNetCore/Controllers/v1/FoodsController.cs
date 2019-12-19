@@ -23,7 +23,7 @@ namespace SampleWebApiAspNetCore.v1.Controllers
         private readonly IMapper _mapper;
 
         public FoodsController(
-            IUrlHelper urlHelper, 
+            IUrlHelper urlHelper,
             IFoodRepository foodRepository,
             IMapper mapper)
         {
@@ -33,9 +33,9 @@ namespace SampleWebApiAspNetCore.v1.Controllers
         }
 
         [HttpGet(Name = nameof(GetAllFoods))]
-        public ActionResult GetAllFoods([FromQuery] QueryParameters queryParameters)
+        public ActionResult GetAllFoods(ApiVersion version, [FromQuery] QueryParameters queryParameters)
         {
-            List<FoodItem> foodItems = _foodRepository.GetAll(queryParameters).ToList();
+            List<FoodEntity> foodItems = _foodRepository.GetAll(queryParameters).ToList();
 
             var allItemCount = _foodRepository.Count();
 
@@ -50,9 +50,9 @@ namespace SampleWebApiAspNetCore.v1.Controllers
             Response.Headers.Add("X-Pagination",
                 Newtonsoft.Json.JsonConvert.SerializeObject(paginationMetadata));
 
-            var links = CreateLinksForCollection(queryParameters, allItemCount);
+            var links = CreateLinksForCollection(queryParameters, allItemCount, version);
 
-            var toReturn = foodItems.Select(x => ExpandSingleFoodItem(x));
+            var toReturn = foodItems.Select(x => ExpandSingleFoodItem(x, version));
 
             return Ok(new
             {
@@ -63,27 +63,27 @@ namespace SampleWebApiAspNetCore.v1.Controllers
 
         [HttpGet]
         [Route("{id:int}", Name = nameof(GetSingleFood))]
-        public ActionResult GetSingleFood(int id)
+        public ActionResult GetSingleFood(ApiVersion version, int id)
         {
-            FoodItem foodItem = _foodRepository.GetSingle(id);
+            FoodEntity foodItem = _foodRepository.GetSingle(id);
 
             if (foodItem == null)
             {
                 return NotFound();
             }
 
-            return Ok(ExpandSingleFoodItem(foodItem));
+            return Ok(ExpandSingleFoodItem(foodItem, version));
         }
 
         [HttpPost(Name = nameof(AddFood))]
-        public ActionResult<FoodItemDto> AddFood([FromBody] FoodCreateDto foodCreateDto)
+        public ActionResult<FoodDto> AddFood(ApiVersion version, [FromBody] FoodCreateDto foodCreateDto)
         {
             if (foodCreateDto == null)
             {
                 return BadRequest();
             }
 
-            FoodItem toAdd = _mapper.Map<FoodItem>(foodCreateDto);
+            FoodEntity toAdd = _mapper.Map<FoodEntity>(foodCreateDto);
 
             _foodRepository.Add(toAdd);
 
@@ -92,21 +92,21 @@ namespace SampleWebApiAspNetCore.v1.Controllers
                 throw new Exception("Creating a fooditem failed on save.");
             }
 
-            FoodItem newFoodItem = _foodRepository.GetSingle(toAdd.Id);
+            FoodEntity newFoodItem = _foodRepository.GetSingle(toAdd.Id);
 
-            return CreatedAtRoute(nameof(GetSingleFood), new { id = newFoodItem.Id },
-                _mapper.Map<FoodItemDto>(newFoodItem));
+            return CreatedAtRoute(nameof(GetSingleFood), new { version = version.ToString(), id = newFoodItem.Id },
+                _mapper.Map<FoodDto>(newFoodItem));
         }
 
         [HttpPatch("{id:int}", Name = nameof(PartiallyUpdateFood))]
-        public ActionResult<FoodItemDto> PartiallyUpdateFood(int id, [FromBody] JsonPatchDocument<FoodUpdateDto> patchDoc)
+        public ActionResult<FoodDto> PartiallyUpdateFood(int id, [FromBody] JsonPatchDocument<FoodUpdateDto> patchDoc)
         {
             if (patchDoc == null)
             {
                 return BadRequest();
             }
 
-            FoodItem existingEntity = _foodRepository.GetSingle(id);
+            FoodEntity existingEntity = _foodRepository.GetSingle(id);
 
             if (existingEntity == null)
             {
@@ -124,21 +124,21 @@ namespace SampleWebApiAspNetCore.v1.Controllers
             }
 
             _mapper.Map(foodUpdateDto, existingEntity);
-            FoodItem updated = _foodRepository.Update(id, existingEntity);
+            FoodEntity updated = _foodRepository.Update(id, existingEntity);
 
             if (!_foodRepository.Save())
             {
                 throw new Exception("Updating a fooditem failed on save.");
             }
 
-            return Ok(_mapper.Map<FoodItemDto>(updated));
+            return Ok(_mapper.Map<FoodDto>(updated));
         }
 
         [HttpDelete]
         [Route("{id:int}", Name = nameof(RemoveFood))]
         public ActionResult RemoveFood(int id)
         {
-            FoodItem foodItem = _foodRepository.GetSingle(id);
+            FoodEntity foodItem = _foodRepository.GetSingle(id);
 
             if (foodItem == null)
             {
@@ -157,7 +157,7 @@ namespace SampleWebApiAspNetCore.v1.Controllers
 
         [HttpPut]
         [Route("{id:int}", Name = nameof(UpdateFood))]
-        public ActionResult<FoodItemDto> UpdateFood(int id, [FromBody]FoodUpdateDto foodUpdateDto)
+        public ActionResult<FoodDto> UpdateFood(int id, [FromBody]FoodUpdateDto foodUpdateDto)
         {
             if (foodUpdateDto == null)
             {
@@ -180,16 +180,16 @@ namespace SampleWebApiAspNetCore.v1.Controllers
                 throw new Exception("Updating a fooditem failed on save.");
             }
 
-            return Ok(_mapper.Map<FoodItemDto>(existingFoodItem));
+            return Ok(_mapper.Map<FoodDto>(existingFoodItem));
         }
 
         [HttpGet("GetRandomMeal", Name = nameof(GetRandomMeal))]
         public ActionResult GetRandomMeal()
         {
-            ICollection<FoodItem> foodItems = _foodRepository.GetRandomMeal();
+            ICollection<FoodEntity> foodItems = _foodRepository.GetRandomMeal();
 
-            IEnumerable<FoodItemDto> dtos = foodItems
-                .Select(x => _mapper.Map<FoodItemDto>(x));
+            IEnumerable<FoodDto> dtos = foodItems
+                .Select(x => _mapper.Map<FoodDto>(x));
 
             var links = new List<LinkDto>();
 
@@ -203,7 +203,7 @@ namespace SampleWebApiAspNetCore.v1.Controllers
             });
         }
 
-        private List<LinkDto> CreateLinksForCollection(QueryParameters queryParameters, int totalCount)
+        private List<LinkDto> CreateLinksForCollection(QueryParameters queryParameters, int totalCount, ApiVersion version)
         {
             var links = new List<LinkDto>();
 
@@ -249,18 +249,20 @@ namespace SampleWebApiAspNetCore.v1.Controllers
                 }), "previous", "GET"));
             }
 
+            var posturl = _urlHelper.Link(nameof(AddFood), new { version = version.ToString() });
+
             links.Add(
-               new LinkDto(_urlHelper.Link(nameof(AddFood), null),
+               new LinkDto(posturl,
                "create_food",
                "POST"));
 
             return links;
         }
 
-        private dynamic ExpandSingleFoodItem(FoodItem foodItem)
+        private dynamic ExpandSingleFoodItem(FoodEntity foodItem, ApiVersion version)
         {
-            var links = GetLinks(foodItem.Id);
-            FoodItemDto item = _mapper.Map<FoodItemDto>(foodItem);
+            var links = GetLinks(foodItem.Id, version);
+            FoodDto item = _mapper.Map<FoodDto>(foodItem);
 
             var resourceToReturn = item.ToDynamic() as IDictionary<string, object>;
             resourceToReturn.Add("links", links);
@@ -268,27 +270,33 @@ namespace SampleWebApiAspNetCore.v1.Controllers
             return resourceToReturn;
         }
 
-        private IEnumerable<LinkDto> GetLinks(int id)
+        private IEnumerable<LinkDto> GetLinks(int id, ApiVersion version)
         {
             var links = new List<LinkDto>();
 
-            links.Add(
-              new LinkDto(_urlHelper.Link(nameof(GetSingleFood), new { id = id }),
-              "self",
-              "GET"));
+            var getLink = _urlHelper.Link(nameof(GetSingleFood), new { version = version.ToString(), id = id });
 
             links.Add(
-              new LinkDto(_urlHelper.Link(nameof(RemoveFood), new { id = id }),
+              new LinkDto(getLink, "self", "GET"));
+
+            var deleteLink = _urlHelper.Link(nameof(RemoveFood), new { version = version.ToString(), id = id });
+
+            links.Add(
+              new LinkDto(deleteLink,
               "delete_food",
               "DELETE"));
 
+            var createLink = _urlHelper.Link(nameof(AddFood), new { version = version.ToString() });
+
             links.Add(
-              new LinkDto(_urlHelper.Link(nameof(AddFood), null),
+              new LinkDto(createLink,
               "create_food",
               "POST"));
 
+            var updateLink = _urlHelper.Link(nameof(UpdateFood), new { version = version.ToString(), id = id });
+
             links.Add(
-               new LinkDto(_urlHelper.Link(nameof(UpdateFood), new { id = id }),
+               new LinkDto(updateLink,
                "update_food",
                "PUT"));
 

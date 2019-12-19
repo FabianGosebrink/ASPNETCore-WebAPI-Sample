@@ -11,7 +11,7 @@ namespace SampleWebApiAspNetCore.Repositories
 
         }
 
-        public DbSet<FoodItem> FoodItems { get; set; }
+        public DbSet<FoodEntity> FoodItems { get; set; }
 
     }
 }

@@ -8,9 +8,9 @@ namespace SampleWebApiAspNetCore.MappingProfiles
     {
         public FoodMappings()
         {
-            CreateMap<FoodItem, FoodItemDto>().ReverseMap();
-            CreateMap<FoodItem, FoodUpdateDto>().ReverseMap();
-            CreateMap<FoodItem, FoodCreateDto>().ReverseMap();
+            CreateMap<FoodEntity, FoodDto>().ReverseMap();
+            CreateMap<FoodEntity, FoodUpdateDto>().ReverseMap();
+            CreateMap<FoodEntity, FoodCreateDto>().ReverseMap();
         }
     }
 }

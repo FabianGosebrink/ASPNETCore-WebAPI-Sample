@@ -7,13 +7,13 @@ namespace SampleWebApiAspNetCore.Repositories
 {
     public interface IFoodRepository
     {
-        FoodItem GetSingle(int id);
-        void Add(FoodItem item);
+        FoodEntity GetSingle(int id);
+        void Add(FoodEntity item);
         void Delete(int id);
-        FoodItem Update(int id, FoodItem item);
-        IQueryable<FoodItem> GetAll(QueryParameters queryParameters);
+        FoodEntity Update(int id, FoodEntity item);
+        IQueryable<FoodEntity> GetAll(QueryParameters queryParameters);
 
-        ICollection<FoodItem> GetRandomMeal();
+        ICollection<FoodEntity> GetRandomMeal();
         int Count();
 
         bool Save();

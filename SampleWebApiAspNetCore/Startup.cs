@@ -14,7 +14,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Microsoft.OpenApi.Models;
+using Newtonsoft.Json.Serialization;
 using SampleWebApiAspNetCore.MappingProfiles;
 using SampleWebApiAspNetCore.Repositories;
 using SampleWebApiAspNetCore.Services;
@@ -61,8 +61,9 @@ namespace SampleWebApiAspNetCore
 
             
             services.AddControllers()
-                .AddNewtonsoftJson()
-                .SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
+                   .AddNewtonsoftJson(options =>
+                       options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver())
+                            .SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
 
              services.AddApiVersioning(
                 config =>
@@ -88,8 +89,11 @@ namespace SampleWebApiAspNetCore
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory, 
-            IWebHostEnvironment env, IApiVersionDescriptionProvider provider)
+        public void Configure(
+            IApplicationBuilder app, 
+            ILoggerFactory loggerFactory, 
+            IWebHostEnvironment env, 
+            IApiVersionDescriptionProvider provider)
         {
             if (env.IsDevelopment())
             {
