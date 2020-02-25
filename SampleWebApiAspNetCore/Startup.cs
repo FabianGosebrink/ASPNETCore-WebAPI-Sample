@@ -37,17 +37,7 @@ namespace SampleWebApiAspNetCore
         {
             services.AddOptions();
             services.AddDbContext<FoodDbContext>(opt => opt.UseInMemoryDatabase("FoodDatabase"));
-            services.AddCors(options =>
-            {
-                options.AddPolicy("AllowAllOrigins",
-                    builder =>
-                    {
-                        builder
-                            .AllowAnyOrigin()
-                            .AllowAnyHeader()
-                            .AllowAnyMethod();
-                    });
-            });
+            services.AddCustomCors("AllowAllOrigins");
 
             services.AddSingleton<ISeedDataService, SeedDataService>();
             services.AddScoped<IFoodRepository, FoodSqlRepository>();
@@ -59,30 +49,13 @@ namespace SampleWebApiAspNetCore
                 var factory = x.GetRequiredService<IUrlHelperFactory>();
                 return factory.GetUrlHelper(actionContext);
             });
-
             
             services.AddControllers()
                    .AddNewtonsoftJson(options =>
                        options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver())
                             .SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
 
-             services.AddApiVersioning(
-                config =>
-                {
-                    config.ReportApiVersions = true;
-                    config.AssumeDefaultVersionWhenUnspecified = true;
-                    config.DefaultApiVersion = new ApiVersion(1, 0);
-                    config.ApiVersionReader = new HeaderApiVersionReader("api-version");
-                });
-            services.AddVersionedApiExplorer(
-                options =>
-                {
-                    options.GroupNameFormat = "'v'VVV";
-
-                    // note: this option is only necessary when versioning by url segment. the SubstitutionFormat
-                    // can also be used to control the format of the API version in route templates
-                    options.SubstituteApiVersionInUrl = true;
-                });
+            services.AddVersioning();
             services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();
             services.AddSwaggerGen();
 
