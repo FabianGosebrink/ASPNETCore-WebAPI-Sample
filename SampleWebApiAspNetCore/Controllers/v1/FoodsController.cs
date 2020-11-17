@@ -94,7 +94,8 @@ namespace SampleWebApiAspNetCore.v1.Controllers
 
             FoodEntity newFoodItem = _foodRepository.GetSingle(toAdd.Id);
 
-            return CreatedAtRoute(nameof(GetSingleFood), new { version = version.ToString(), id = newFoodItem.Id },
+            return CreatedAtRoute(nameof(GetSingleFood),
+                new { version = version.ToString(), id = newFoodItem.Id },
                 _mapper.Map<FoodDto>(newFoodItem));
         }
 
@@ -157,7 +158,7 @@ namespace SampleWebApiAspNetCore.v1.Controllers
 
         [HttpPut]
         [Route("{id:int}", Name = nameof(UpdateFood))]
-        public ActionResult<FoodDto> UpdateFood(int id, [FromBody]FoodUpdateDto foodUpdateDto)
+        public ActionResult<FoodDto> UpdateFood(int id, [FromBody] FoodUpdateDto foodUpdateDto)
         {
             if (foodUpdateDto == null)
             {
