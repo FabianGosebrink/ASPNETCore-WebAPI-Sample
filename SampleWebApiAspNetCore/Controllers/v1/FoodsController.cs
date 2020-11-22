@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using SampleWebApiAspNetCore.Entities;
 using SampleWebApiAspNetCore.Models;
 using SampleWebApiAspNetCore.Helpers;
+using System.Text.Json;
 
 namespace SampleWebApiAspNetCore.v1.Controllers
 {
@@ -47,8 +48,7 @@ namespace SampleWebApiAspNetCore.v1.Controllers
                 totalPages = queryParameters.GetTotalPages(allItemCount)
             };
 
-            Response.Headers.Add("X-Pagination",
-                Newtonsoft.Json.JsonConvert.SerializeObject(paginationMetadata));
+            Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(paginationMetadata));
 
             var links = CreateLinksForCollection(queryParameters, allItemCount, version);
 
