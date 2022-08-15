@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace SampleWebApiAspNetCore.v2.Controllers
+namespace SampleWebApiAspNetCore.Controllers.v2
 {
     [ApiController]
     [ApiVersion("2.0")]

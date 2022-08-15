@@ -1,5 +1,3 @@
-using System;
-using System.Linq;
 
 namespace SampleWebApiAspNetCore.Models
 {
@@ -14,8 +12,8 @@ namespace SampleWebApiAspNetCore.Models
             get { return _pageCount; }
             set { _pageCount = (value > maxPageCount) ? maxPageCount : value; }
         }
-        
-        public string Query { get; set; }
+
+        public string? Query { get; set; } = "";
 
         public string OrderBy { get; set; } = "Name";
     }

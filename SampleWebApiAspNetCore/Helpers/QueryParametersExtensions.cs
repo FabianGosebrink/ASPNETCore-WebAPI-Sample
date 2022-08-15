@@ -1,5 +1,3 @@
-using System;
-using System.Linq;
 using SampleWebApiAspNetCore.Models;
 
 namespace SampleWebApiAspNetCore.Helpers
