@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using SampleWebApiAspNetCore.Entities;
 using SampleWebApiAspNetCore.Models;
 using SampleWebApiAspNetCore.Helpers;
+using SampleWebApiAspNetCore.Services;
 using System.Text.Json;
 
 namespace SampleWebApiAspNetCore.v1.Controllers
@@ -22,15 +23,17 @@ namespace SampleWebApiAspNetCore.v1.Controllers
         private readonly IFoodRepository _foodRepository;
         private readonly IUrlHelper _urlHelper;
         private readonly IMapper _mapper;
+        private readonly ILinkService<FoodsController> _linkService;
 
         public FoodsController(
             IUrlHelper urlHelper,
             IFoodRepository foodRepository,
-            IMapper mapper)
+            IMapper mapper,
+            ILinkService<FoodsController> linkService)
         {
             _foodRepository = foodRepository;
             _mapper = mapper;
-            _urlHelper = urlHelper;
+            _linkService = linkService;
         }
 
         [HttpGet(Name = nameof(GetAllFoods))]
@@ -50,9 +53,8 @@ namespace SampleWebApiAspNetCore.v1.Controllers
 
             Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(paginationMetadata));
 
-            var links = CreateLinksForCollection(queryParameters, allItemCount, version);
-
-            var toReturn = foodItems.Select(x => ExpandSingleFoodItem(x, version));
+            var links = _linkService.CreateLinksForCollection(queryParameters, allItemCount, version);
+            var toReturn = foodItems.Select(x => _linkService.ExpandSingleFoodItem(x, x.Id, version));
 
             return Ok(new
             {
@@ -72,7 +74,9 @@ namespace SampleWebApiAspNetCore.v1.Controllers
                 return NotFound();
             }
 
-            return Ok(ExpandSingleFoodItem(foodItem, version));
+            FoodDto item = _mapper.Map<FoodDto>(foodItem);
+
+            return Ok(_linkService.ExpandSingleFoodItem(item, item.Id, version));
         }
 
         [HttpPost(Name = nameof(AddFood))]
@@ -189,8 +193,7 @@ namespace SampleWebApiAspNetCore.v1.Controllers
         {
             ICollection<FoodEntity> foodItems = _foodRepository.GetRandomMeal();
 
-            IEnumerable<FoodDto> dtos = foodItems
-                .Select(x => _mapper.Map<FoodDto>(x));
+            IEnumerable<FoodDto> dtos = foodItems.Select(x => _mapper.Map<FoodDto>(x));
 
             var links = new List<LinkDto>();
 
@@ -202,106 +205,6 @@ namespace SampleWebApiAspNetCore.v1.Controllers
                 value = dtos,
                 links = links
             });
-        }
-
-        private List<LinkDto> CreateLinksForCollection(QueryParameters queryParameters, int totalCount, ApiVersion version)
-        {
-            var links = new List<LinkDto>();
-
-            // self 
-            links.Add(new LinkDto(_urlHelper.Link(nameof(GetAllFoods), new
-            {
-                pagecount = queryParameters.PageCount,
-                page = queryParameters.Page,
-                orderby = queryParameters.OrderBy
-            }), "self", "GET"));
-
-            links.Add(new LinkDto(_urlHelper.Link(nameof(GetAllFoods), new
-            {
-                pagecount = queryParameters.PageCount,
-                page = 1,
-                orderby = queryParameters.OrderBy
-            }), "first", "GET"));
-
-            links.Add(new LinkDto(_urlHelper.Link(nameof(GetAllFoods), new
-            {
-                pagecount = queryParameters.PageCount,
-                page = queryParameters.GetTotalPages(totalCount),
-                orderby = queryParameters.OrderBy
-            }), "last", "GET"));
-
-            if (queryParameters.HasNext(totalCount))
-            {
-                links.Add(new LinkDto(_urlHelper.Link(nameof(GetAllFoods), new
-                {
-                    pagecount = queryParameters.PageCount,
-                    page = queryParameters.Page + 1,
-                    orderby = queryParameters.OrderBy
-                }), "next", "GET"));
-            }
-
-            if (queryParameters.HasPrevious())
-            {
-                links.Add(new LinkDto(_urlHelper.Link(nameof(GetAllFoods), new
-                {
-                    pagecount = queryParameters.PageCount,
-                    page = queryParameters.Page - 1,
-                    orderby = queryParameters.OrderBy
-                }), "previous", "GET"));
-            }
-
-            var posturl = _urlHelper.Link(nameof(AddFood), new { version = version.ToString() });
-
-            links.Add(
-               new LinkDto(posturl,
-               "create_food",
-               "POST"));
-
-            return links;
-        }
-
-        private dynamic ExpandSingleFoodItem(FoodEntity foodItem, ApiVersion version)
-        {
-            var links = GetLinks(foodItem.Id, version);
-            FoodDto item = _mapper.Map<FoodDto>(foodItem);
-
-            var resourceToReturn = item.ToDynamic() as IDictionary<string, object>;
-            resourceToReturn.Add("links", links);
-
-            return resourceToReturn;
-        }
-
-        private IEnumerable<LinkDto> GetLinks(int id, ApiVersion version)
-        {
-            var links = new List<LinkDto>();
-
-            var getLink = _urlHelper.Link(nameof(GetSingleFood), new { version = version.ToString(), id = id });
-
-            links.Add(
-              new LinkDto(getLink, "self", "GET"));
-
-            var deleteLink = _urlHelper.Link(nameof(RemoveFood), new { version = version.ToString(), id = id });
-
-            links.Add(
-              new LinkDto(deleteLink,
-              "delete_food",
-              "DELETE"));
-
-            var createLink = _urlHelper.Link(nameof(AddFood), new { version = version.ToString() });
-
-            links.Add(
-              new LinkDto(createLink,
-              "create_food",
-              "POST"));
-
-            var updateLink = _urlHelper.Link(nameof(UpdateFood), new { version = version.ToString(), id = id });
-
-            links.Add(
-               new LinkDto(updateLink,
-               "update_food",
-               "PUT"));
-
-            return links;
         }
     }
 }
