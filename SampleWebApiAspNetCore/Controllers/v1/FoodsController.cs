@@ -1,32 +1,26 @@
-﻿using System;
-using System.Linq;
-using AutoMapper;
-using SampleWebApiAspNetCore.Dtos;
+﻿using AutoMapper;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
-using SampleWebApiAspNetCore.Repositories;
-using System.Collections.Generic;
+using SampleWebApiAspNetCore.Dtos;
 using SampleWebApiAspNetCore.Entities;
-using SampleWebApiAspNetCore.Models;
 using SampleWebApiAspNetCore.Helpers;
 using SampleWebApiAspNetCore.Services;
+using SampleWebApiAspNetCore.Models;
+using SampleWebApiAspNetCore.Repositories;
 using System.Text.Json;
 
-namespace SampleWebApiAspNetCore.v1.Controllers
+namespace SampleWebApiAspNetCore.Controllers.v1
 {
     [ApiController]
     [ApiVersion("1.0")]
     [Route("api/v{version:apiVersion}/[controller]")]
-    //[Route("api/[controller]")]
     public class FoodsController : ControllerBase
     {
         private readonly IFoodRepository _foodRepository;
-        private readonly IUrlHelper _urlHelper;
         private readonly IMapper _mapper;
         private readonly ILinkService<FoodsController> _linkService;
 
         public FoodsController(
-            IUrlHelper urlHelper,
             IFoodRepository foodRepository,
             IMapper mapper,
             ILinkService<FoodsController> linkService)
@@ -198,7 +192,7 @@ namespace SampleWebApiAspNetCore.v1.Controllers
             var links = new List<LinkDto>();
 
             // self 
-            links.Add(new LinkDto(_urlHelper.Link(nameof(GetRandomMeal), null), "self", "GET"));
+            links.Add(new LinkDto(Url.Link(nameof(GetRandomMeal), null), "self", "GET"));
 
             return Ok(new
             {
