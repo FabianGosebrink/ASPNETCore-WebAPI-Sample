@@ -14,7 +14,9 @@ namespace SampleWebApiAspNetCore.Helpers
                    config.ReportApiVersions = true;
                    config.AssumeDefaultVersionWhenUnspecified = true;
                    config.DefaultApiVersion = new ApiVersion(1, 0);
-                   config.ApiVersionReader = new HeaderApiVersionReader("api-version");
+                   config.ApiVersionReader = ApiVersionReader.Combine(new UrlSegmentApiVersionReader(),
+                                                                                        new HeaderApiVersionReader("x-api-version"),
+                                                                                        new MediaTypeApiVersionReader("x-api-version"));
                });
             services.AddVersionedApiExplorer(
                 options =>

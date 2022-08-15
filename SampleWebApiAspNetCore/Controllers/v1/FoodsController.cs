@@ -1,36 +1,29 @@
-﻿using System;
-using System.Linq;
-using AutoMapper;
-using SampleWebApiAspNetCore.Dtos;
+﻿using AutoMapper;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
-using SampleWebApiAspNetCore.Repositories;
-using System.Collections.Generic;
+using SampleWebApiAspNetCore.Dtos;
 using SampleWebApiAspNetCore.Entities;
-using SampleWebApiAspNetCore.Models;
 using SampleWebApiAspNetCore.Helpers;
+using SampleWebApiAspNetCore.Models;
+using SampleWebApiAspNetCore.Repositories;
 using System.Text.Json;
 
-namespace SampleWebApiAspNetCore.v1.Controllers
+namespace SampleWebApiAspNetCore.Controllers.v1
 {
     [ApiController]
     [ApiVersion("1.0")]
     [Route("api/v{version:apiVersion}/[controller]")]
-    //[Route("api/[controller]")]
     public class FoodsController : ControllerBase
     {
         private readonly IFoodRepository _foodRepository;
-        private readonly IUrlHelper _urlHelper;
         private readonly IMapper _mapper;
 
         public FoodsController(
-            IUrlHelper urlHelper,
             IFoodRepository foodRepository,
             IMapper mapper)
         {
             _foodRepository = foodRepository;
             _mapper = mapper;
-            _urlHelper = urlHelper;
         }
 
         [HttpGet(Name = nameof(GetAllFoods))]
@@ -195,7 +188,7 @@ namespace SampleWebApiAspNetCore.v1.Controllers
             var links = new List<LinkDto>();
 
             // self 
-            links.Add(new LinkDto(_urlHelper.Link(nameof(GetRandomMeal), null), "self", "GET"));
+            links.Add(new LinkDto(Url.Link(nameof(GetRandomMeal), null), "self", "GET"));
 
             return Ok(new
             {
@@ -209,21 +202,21 @@ namespace SampleWebApiAspNetCore.v1.Controllers
             var links = new List<LinkDto>();
 
             // self 
-            links.Add(new LinkDto(_urlHelper.Link(nameof(GetAllFoods), new
+            links.Add(new LinkDto(Url.Link(nameof(GetAllFoods), new
             {
                 pagecount = queryParameters.PageCount,
                 page = queryParameters.Page,
                 orderby = queryParameters.OrderBy
             }), "self", "GET"));
 
-            links.Add(new LinkDto(_urlHelper.Link(nameof(GetAllFoods), new
+            links.Add(new LinkDto(Url.Link(nameof(GetAllFoods), new
             {
                 pagecount = queryParameters.PageCount,
                 page = 1,
                 orderby = queryParameters.OrderBy
             }), "first", "GET"));
 
-            links.Add(new LinkDto(_urlHelper.Link(nameof(GetAllFoods), new
+            links.Add(new LinkDto(Url.Link(nameof(GetAllFoods), new
             {
                 pagecount = queryParameters.PageCount,
                 page = queryParameters.GetTotalPages(totalCount),
@@ -232,7 +225,7 @@ namespace SampleWebApiAspNetCore.v1.Controllers
 
             if (queryParameters.HasNext(totalCount))
             {
-                links.Add(new LinkDto(_urlHelper.Link(nameof(GetAllFoods), new
+                links.Add(new LinkDto(Url.Link(nameof(GetAllFoods), new
                 {
                     pagecount = queryParameters.PageCount,
                     page = queryParameters.Page + 1,
@@ -242,7 +235,7 @@ namespace SampleWebApiAspNetCore.v1.Controllers
 
             if (queryParameters.HasPrevious())
             {
-                links.Add(new LinkDto(_urlHelper.Link(nameof(GetAllFoods), new
+                links.Add(new LinkDto(Url.Link(nameof(GetAllFoods), new
                 {
                     pagecount = queryParameters.PageCount,
                     page = queryParameters.Page - 1,
@@ -250,7 +243,7 @@ namespace SampleWebApiAspNetCore.v1.Controllers
                 }), "previous", "GET"));
             }
 
-            var posturl = _urlHelper.Link(nameof(AddFood), new { version = version.ToString() });
+            var posturl = Url.Link(nameof(AddFood), new { version = version.ToString() });
 
             links.Add(
                new LinkDto(posturl,
@@ -275,26 +268,26 @@ namespace SampleWebApiAspNetCore.v1.Controllers
         {
             var links = new List<LinkDto>();
 
-            var getLink = _urlHelper.Link(nameof(GetSingleFood), new { version = version.ToString(), id = id });
+            var getLink = Url.Link(nameof(GetSingleFood), new { version = version.ToString(), id = id });
 
             links.Add(
               new LinkDto(getLink, "self", "GET"));
 
-            var deleteLink = _urlHelper.Link(nameof(RemoveFood), new { version = version.ToString(), id = id });
+            var deleteLink = Url.Link(nameof(RemoveFood), new { version = version.ToString(), id = id });
 
             links.Add(
               new LinkDto(deleteLink,
               "delete_food",
               "DELETE"));
 
-            var createLink = _urlHelper.Link(nameof(AddFood), new { version = version.ToString() });
+            var createLink = Url.Link(nameof(AddFood), new { version = version.ToString() });
 
             links.Add(
               new LinkDto(createLink,
               "create_food",
               "POST"));
 
-            var updateLink = _urlHelper.Link(nameof(UpdateFood), new { version = version.ToString(), id = id });
+            var updateLink = Url.Link(nameof(UpdateFood), new { version = version.ToString(), id = id });
 
             links.Add(
                new LinkDto(updateLink,

@@ -1,45 +1,72 @@
-﻿using Microsoft.AspNetCore;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Mvc.ApiExplorer;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using Newtonsoft.Json.Serialization;
+using SampleWebApiAspNetCore;
+using SampleWebApiAspNetCore.Helpers;
+using SampleWebApiAspNetCore.MappingProfiles;
 using SampleWebApiAspNetCore.Repositories;
 using SampleWebApiAspNetCore.Services;
-using System;
+using Swashbuckle.AspNetCore.SwaggerGen;
 
-namespace SampleWebApiAspNetCore
+var builder = WebApplication.CreateBuilder(args);
+
+// Add services to the container.
+
+builder.Services.AddControllers()
+                .AddNewtonsoftJson(options =>
+                       options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver()); 
+
+// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+builder.Services.AddCustomCors("AllowAllOrigins");
+
+builder.Services.AddSingleton<ISeedDataService, SeedDataService>();
+builder.Services.AddScoped<IFoodRepository, FoodSqlRepository>();
+builder.Services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();
+
+builder.Services.AddRouting(options => options.LowercaseUrls = true);
+builder.Services.AddVersioning();
+
+builder.Services.AddDbContext<FoodDbContext>(opt =>
+    opt.UseInMemoryDatabase("FoodDatabase"));
+
+builder.Services.AddAutoMapper(typeof(FoodMappings));
+
+var app = builder.Build();
+
+var apiVersionDescriptionProvider = app.Services.GetRequiredService<IApiVersionDescriptionProvider>();
+var loggerFactory = app.Services.GetRequiredService<ILoggerFactory>();
+
+// Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment())
 {
-    public class Program
-    {
-        public static void Main(string[] args)
+    app.UseSwagger();
+    app.UseSwaggerUI(
+        options =>
         {
-            var host = CreateHostBuilder(args).Build();
-
-            // Initializes db.
-            using (var scope = host.Services.CreateScope())
+            foreach (var description in apiVersionDescriptionProvider.ApiVersionDescriptions)
             {
-                var services = scope.ServiceProvider;
-                try
-                {
-                    var context = services.GetRequiredService<FoodDbContext>();
-                    var dbInitializer = services.GetRequiredService<ISeedDataService>();
-                    dbInitializer.Initialize(context).GetAwaiter().GetResult();
-                }
-                catch (Exception ex)
-                {
-                    var logger = services.GetRequiredService<ILogger<Program>>();
-                    logger.LogError(ex, "An error occurred while seeding the database.");
-                }
+                options.SwaggerEndpoint(
+                    $"/swagger/{description.GroupName}/swagger.json",
+                    description.GroupName.ToUpperInvariant());
             }
+        });
 
-            host.Run();
-        }
-
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
-           Host.CreateDefaultBuilder(args)
-               .ConfigureWebHostDefaults(webBuilder =>
-               {
-                   webBuilder.UseStartup<Startup>();
-               });
-    }
+    app.SeedData();
+} 
+else
+{
+    app.AddProductionExceptionHandling(loggerFactory);
 }
+
+app.UseCors("AllowAllOrigins");
+app.UseHttpsRedirection();
+
+app.UseAuthorization();
+
+app.MapControllers();
+
+app.Run();
