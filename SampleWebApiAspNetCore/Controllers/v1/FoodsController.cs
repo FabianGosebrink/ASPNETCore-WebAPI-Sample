@@ -8,6 +8,8 @@ using SampleWebApiAspNetCore.Services;
 using SampleWebApiAspNetCore.Models;
 using SampleWebApiAspNetCore.Repositories;
 using System.Text.Json;
+using System;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace SampleWebApiAspNetCore.Controllers.v1
 {
@@ -91,14 +93,15 @@ namespace SampleWebApiAspNetCore.Controllers.v1
             }
 
             FoodEntity newFoodItem = _foodRepository.GetSingle(toAdd.Id);
+            FoodDto foodDto = _mapper.Map<FoodDto>(newFoodItem);
 
             return CreatedAtRoute(nameof(GetSingleFood),
                 new { version = version.ToString(), id = newFoodItem.Id },
-                _mapper.Map<FoodDto>(newFoodItem));
+                _linkService.ExpandSingleFoodItem(foodDto, foodDto.Id, version));
         }
 
         [HttpPatch("{id:int}", Name = nameof(PartiallyUpdateFood))]
-        public ActionResult<FoodDto> PartiallyUpdateFood(int id, [FromBody] JsonPatchDocument<FoodUpdateDto> patchDoc)
+        public ActionResult<FoodDto> PartiallyUpdateFood(ApiVersion version, int id, [FromBody] JsonPatchDocument<FoodUpdateDto> patchDoc)
         {
             if (patchDoc == null)
             {
@@ -130,7 +133,9 @@ namespace SampleWebApiAspNetCore.Controllers.v1
                 throw new Exception("Updating a fooditem failed on save.");
             }
 
-            return Ok(_mapper.Map<FoodDto>(updated));
+            FoodDto foodDto = _mapper.Map<FoodDto>(updated);
+
+            return Ok(_linkService.ExpandSingleFoodItem(foodDto, foodDto.Id, version));
         }
 
         [HttpDelete]
@@ -156,7 +161,7 @@ namespace SampleWebApiAspNetCore.Controllers.v1
 
         [HttpPut]
         [Route("{id:int}", Name = nameof(UpdateFood))]
-        public ActionResult<FoodDto> UpdateFood(int id, [FromBody] FoodUpdateDto foodUpdateDto)
+        public ActionResult<FoodDto> UpdateFood(ApiVersion version, int id, [FromBody] FoodUpdateDto foodUpdateDto)
         {
             if (foodUpdateDto == null)
             {
@@ -179,7 +184,9 @@ namespace SampleWebApiAspNetCore.Controllers.v1
                 throw new Exception("Updating a fooditem failed on save.");
             }
 
-            return Ok(_mapper.Map<FoodDto>(existingFoodItem));
+            FoodDto foodDto = _mapper.Map<FoodDto>(existingFoodItem);
+
+            return Ok(_linkService.ExpandSingleFoodItem(foodDto, foodDto.Id, version));
         }
 
         [HttpGet("GetRandomMeal", Name = nameof(GetRandomMeal))]
