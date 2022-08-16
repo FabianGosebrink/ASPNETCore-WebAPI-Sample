@@ -2,42 +2,27 @@
 using SampleWebApiAspNetCore.Models;
 using SampleWebApiAspNetCore.Helpers;
 using System.Reflection;
+using Microsoft.AspNetCore.Mvc.Routing;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 
 namespace SampleWebApiAspNetCore.Services
 {
-    [AttributeUsage(AttributeTargets.Method)]
-    public class LinkCollectionAttribute : Attribute
-    {
-        private string name;
-
-        public LinkCollectionAttribute(string name)
-        {
-            this.name = name;
-        }
-    }
-
-    [AttributeUsage(AttributeTargets.Method)]
-    public class HateoasAttribute : Attribute
-    {
-
-    }
-
     public class LinkService<T> : ILinkService<T>
     {
         private readonly IUrlHelper _urlHelper;
 
-        public LinkService(IUrlHelper urlHelper)
+        public LinkService(IUrlHelperFactory urlHelperFactory, IActionContextAccessor actionContextAccessor)
         {
-            _urlHelper = urlHelper;
+            _urlHelper = urlHelperFactory.GetUrlHelper(actionContextAccessor.ActionContext);
         }
 
         public List<LinkDto> CreateLinksForCollection(QueryParameters queryParameters, int totalCount, ApiVersion version)
         {
-            Type myType = (typeof(T));
-            MethodInfo[] methods = myType.GetMethods();
+            Type controllerType = (typeof(T));
+            MethodInfo[] methods = controllerType.GetMethods();
 
             var links = new List<LinkDto>();
-            var getAllMethodName = GetGetAllMethod(methods);
+            var getAllMethodName = GetMethod(methods, typeof(HttpGetAttribute), 0);
 
             // self 
             links.Add(new LinkDto(_urlHelper.Link(getAllMethodName, new
@@ -95,7 +80,7 @@ namespace SampleWebApiAspNetCore.Services
         {
             var resourceToReturn = resource.ToDynamic() as IDictionary<string, object>;
 
-            var links = GetLinks(identifier, version);
+            var links = GetLinksForSingleItem(identifier, version);
 
             resourceToReturn.Add("links", links);
 
@@ -103,13 +88,13 @@ namespace SampleWebApiAspNetCore.Services
         }
 
 
-        private IEnumerable<LinkDto> GetLinks(int id, ApiVersion version)
+        private IEnumerable<LinkDto> GetLinksForSingleItem(int id, ApiVersion version)
         {
             Type myType = (typeof(T));
             MethodInfo[] methods = myType.GetMethods();
             var links = new List<LinkDto>();
 
-            var getLink = _urlHelper.Link(GetGetSingleMethod(methods), new { version = version.ToString(), id = id });
+            var getLink = _urlHelper.Link(GetMethod(methods, typeof(HttpGetAttribute), 1), new { version = version.ToString(), id = id });
             links.Add(new LinkDto(getLink, "self", "GET"));
 
             var deleteLink = _urlHelper.Link(GetMethod(methods, typeof(HttpDeleteAttribute)), new { version = version.ToString(), id = id });
@@ -133,62 +118,33 @@ namespace SampleWebApiAspNetCore.Services
             return links;
         }
 
-        private string GetMethod(MethodInfo[] methods, Type type)
+        private string GetMethod(MethodInfo[] methods, Type type, int routeParamsLength = 0)
         {
-            var method = methods.Where(m => m.GetCustomAttributes(type, false).Length > 0).ToArray().FirstOrDefault();
+            var filteredMethods = methods.Where(m => m.GetCustomAttributes(type, false).Length > 0).ToArray();
 
-            if (method is null)
+            if (filteredMethods.Length == 0)
             {
-                return null;
+                return "";
             }
 
-            return method.Name;
-        }
-
-        private string GetGetSingleMethod(MethodInfo[] methods)
-        {
-            var getMethods = methods.Where(m => m.GetCustomAttributes(typeof(HttpGetAttribute), false).Length > 0).ToArray();
-
-            if (getMethods.Length == 0)
+            if (routeParamsLength == 0)
             {
-                return null;
+                var toReturn = filteredMethods.FirstOrDefault();
+
+                return toReturn is not null ? toReturn.Name : "";
             }
 
-            foreach (var getMethod in getMethods)
+            foreach (var method in filteredMethods)
             {
-                var routeAttribs = getMethod.GetCustomAttributes(typeof(RouteAttribute));
+                var routeAttribs = method.GetCustomAttributes(typeof(RouteAttribute));
 
-                if(routeAttribs.Count() == 1)
+                if (routeAttribs.Count() == routeParamsLength)
                 {
-                    return getMethod.Name;
+                    return method.Name;
                 }
             }
 
-
-            return null;
-        }
-
-        private string GetGetAllMethod(MethodInfo[] methods)
-        {
-            var getMethods = methods.Where(m => m.GetCustomAttributes(typeof(HttpGetAttribute), false).Length > 0).ToArray();
-
-            if (getMethods.Length == 0)
-            {
-                return null;
-            }
-
-            foreach (var getMethod in getMethods)
-            {
-                var routeAttribs = getMethod.GetCustomAttributes(typeof(RouteAttribute));
-
-                if (routeAttribs.Count() == 0)
-                {
-                    return getMethod.Name;
-                }
-            }
-
-
-            return null;
+            return "";
         }
     }
 }
