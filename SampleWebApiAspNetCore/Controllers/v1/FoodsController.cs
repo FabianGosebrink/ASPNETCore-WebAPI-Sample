@@ -8,8 +8,6 @@ using SampleWebApiAspNetCore.Services;
 using SampleWebApiAspNetCore.Models;
 using SampleWebApiAspNetCore.Repositories;
 using System.Text.Json;
-using System;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace SampleWebApiAspNetCore.Controllers.v1
 {
