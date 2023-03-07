@@ -1,3 +1,5 @@
+using Autofac.Extensions.DependencyInjection;
+using Autofac;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
@@ -8,6 +10,7 @@ using Newtonsoft.Json.Serialization;
 using SampleWebApiAspNetCore;
 using SampleWebApiAspNetCore.Helpers;
 using SampleWebApiAspNetCore.MappingProfiles;
+using SampleWebApiAspNetCore.Modules.Autofac;
 using SampleWebApiAspNetCore.Repositories;
 using SampleWebApiAspNetCore.Services;
 using Swashbuckle.AspNetCore.SwaggerGen;
@@ -26,13 +29,10 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddCustomCors("AllowAllOrigins");
 
-builder.Services.AddSingleton<ISeedDataService, SeedDataService>();
-builder.Services.AddScoped<IFoodRepository, FoodSqlRepository>();
-builder.Services.AddScoped(typeof(ILinkService<>), typeof(LinkService<>));
-builder.Services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();
 
-builder.Services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
-builder.Services.AddSingleton<IUrlHelperFactory, UrlHelperFactory>();
+
+
+
 
 builder.Services.AddRouting(options => options.LowercaseUrls = true);
 builder.Services.AddVersioning();
@@ -42,6 +42,9 @@ builder.Services.AddDbContext<FoodDbContext>(opt =>
 
 builder.Services.AddAutoMapper(typeof(FoodMappings));
 
+builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory());
+
+builder.Host.ConfigureContainer<ContainerBuilder>(containerBuilder => containerBuilder.RegisterModule(new RepoServiceModule()));
 var app = builder.Build();
 
 var apiVersionDescriptionProvider = app.Services.GetRequiredService<IApiVersionDescriptionProvider>();
