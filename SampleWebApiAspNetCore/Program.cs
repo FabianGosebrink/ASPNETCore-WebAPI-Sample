@@ -1,12 +1,17 @@
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json.Serialization;
 using SampleWebApiAspNetCore;
 using SampleWebApiAspNetCore.Helpers;
+using SampleWebApiAspNetCore.Jwt;
+using SampleWebApiAspNetCore.Jwt.Handler;
 using SampleWebApiAspNetCore.MappingProfiles;
 using SampleWebApiAspNetCore.Repositories;
 using SampleWebApiAspNetCore.Services;
@@ -28,6 +33,9 @@ builder.Services.AddCustomCors("AllowAllOrigins");
 
 builder.Services.AddSingleton<ISeedDataService, SeedDataService>();
 builder.Services.AddScoped<IFoodRepository, FoodSqlRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IJwtHandler, JwtHandler>();
+
 builder.Services.AddScoped(typeof(ILinkService<>), typeof(LinkService<>));
 builder.Services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();
 
@@ -41,6 +49,24 @@ builder.Services.AddDbContext<FoodDbContext>(opt =>
     opt.UseInMemoryDatabase("FoodDatabase"));
 
 builder.Services.AddAutoMapper(typeof(FoodMappings));
+
+builder.Services.Configure<JwtSetting>(builder.Configuration.GetSection("JwtSetting"));
+builder.Services.AddAuthentication(scheme => scheme.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(option=> 
+                {
+                    option.SaveToken = builder.Configuration.GetValue<bool>("JwtSetting:IsSaveToken");
+                    option.TokenValidationParameters = new()
+                    {
+                        ValidateIssuer =builder.Configuration.GetValue<bool>("JwtSetting:ValidateIssuer"),
+                        ValidateAudience = builder.Configuration.GetValue<bool>("JwtSetting:ValidateAudience"),
+                        ValidateLifetime = builder.Configuration.GetValue<bool>("JwtSetting:ValidateLifetime"),
+                        ValidateIssuerSigningKey = builder.Configuration.GetValue<bool>("JwtSetting:ValidateIssuerSigningKey"),
+                        ValidIssuer = builder.Configuration.GetValue<string>("JwtSetting:ValidIssuer"),
+                        ValidAudience = builder.Configuration.GetValue<string>("JwtSetting:ValidAudience"),
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration.GetValue<string>("JwtSetting:IssuerSigningKey")!)),
+                        ClockSkew =TimeSpan.Zero
+                    };
+                });
 
 var app = builder.Build();
 
@@ -71,7 +97,7 @@ else
 
 app.UseCors("AllowAllOrigins");
 app.UseHttpsRedirection();
-
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
