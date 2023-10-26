@@ -3,7 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.2.32616.157
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SampleWebApiAspNetCore", "SampleWebApiAspNetCore\SampleWebApiAspNetCore.csproj", "{36DF3175-0775-44CC-8708-5B67F2ED70FE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SampleWebApiAspNetCore", "SampleWebApiAspNetCore\SampleWebApiAspNetCore.csproj", "{36DF3175-0775-44CC-8708-5B67F2ED70FE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SampleWebApiAspNetCore.Data", "SamplwWebApiAspNetCore.Data\SampleWebApiAspNetCore.Data.csproj", "{F8A0B9B1-740C-4512-B416-14908B05BB04}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SampleWebApiAspNetCore.Domain", "SampleWebApiAspNetCore.Domain\SampleWebApiAspNetCore.Domain.csproj", "{97C27773-DBE8-40DD-9B74-ACE0337DBD2C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SampleWebApiAspNetCore.Service", "SampleWebApiAspNetCore.Service\SampleWebApiAspNetCore.Service.csproj", "{3F208067-DCD5-4F2E-B1E5-A2502B0B5495}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +21,18 @@ Global
 		{36DF3175-0775-44CC-8708-5B67F2ED70FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{36DF3175-0775-44CC-8708-5B67F2ED70FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{36DF3175-0775-44CC-8708-5B67F2ED70FE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F8A0B9B1-740C-4512-B416-14908B05BB04}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F8A0B9B1-740C-4512-B416-14908B05BB04}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F8A0B9B1-740C-4512-B416-14908B05BB04}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F8A0B9B1-740C-4512-B416-14908B05BB04}.Release|Any CPU.Build.0 = Release|Any CPU
+		{97C27773-DBE8-40DD-9B74-ACE0337DBD2C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{97C27773-DBE8-40DD-9B74-ACE0337DBD2C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{97C27773-DBE8-40DD-9B74-ACE0337DBD2C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{97C27773-DBE8-40DD-9B74-ACE0337DBD2C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3F208067-DCD5-4F2E-B1E5-A2502B0B5495}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3F208067-DCD5-4F2E-B1E5-A2502B0B5495}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3F208067-DCD5-4F2E-B1E5-A2502B0B5495}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3F208067-DCD5-4F2E-B1E5-A2502B0B5495}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

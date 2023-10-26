@@ -1,12 +1,12 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
-using SampleWebApiAspNetCore.Dtos;
-using SampleWebApiAspNetCore.Entities;
-using SampleWebApiAspNetCore.Helpers;
-using SampleWebApiAspNetCore.Services;
-using SampleWebApiAspNetCore.Models;
-using SampleWebApiAspNetCore.Repositories;
+using SampleWebApiAspNetCore.Data.Repositories.Interfaces;
+using SampleWebApiAspNetCore.Domain.DataTransferObjects.Dtos;
+using SampleWebApiAspNetCore.Domain.Entities;
+using SampleWebApiAspNetCore.Domain.Models;
+using SampleWebApiAspNetCore.Service.Helpers;
+using SampleWebApiAspNetCore.Service.Services.Interfaces;
 using System.Text.Json;
 
 namespace SampleWebApiAspNetCore.Controllers.v1
