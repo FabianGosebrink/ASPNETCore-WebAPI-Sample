@@ -1,9 +1,10 @@
-﻿using SampleWebApiAspNetCore.Entities;
+﻿using SampleWebApiAspNetCore.Common.Interface;
+using SampleWebApiAspNetCore.Entities;
 using SampleWebApiAspNetCore.Models;
 
 namespace SampleWebApiAspNetCore.Repositories
 {
-    public interface IFoodRepository
+    public interface IFoodRepository : IScopedService
     {
         FoodEntity GetSingle(int id);
         void Add(FoodEntity item);
