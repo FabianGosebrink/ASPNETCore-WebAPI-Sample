@@ -1,0 +1,44 @@
+# This is template for commit 
+parameters:
+  Build.Reason: ""
+steps:
+  - task: TerraformInstaller@1
+    displayName: "Latest Version of terraform installation"
+    inputs:
+      terraformVersion: 'latest'
+  - task: TerraformTaskV4@4
+    displayName: terraform init
+    inputs:
+      provider: 'azurerm'
+      command: 'init'
+      backendServiceArm: 'BeStrong'
+      backendAzureRmResourceGroupName: 'tf-tfstate-ResourceGroup'
+      backendAzureRmStorageAccountName: 'tfstate12342'
+      backendAzureRmContainerName: 'tf-tfstate-for-production'
+      backendAzureRmKey: 'prod.tfstate'
+  #Code validation
+  - task: TerraformTaskV4@4
+    displayName: terraform validate
+    inputs:
+      provider: 'azurerm'
+      command: 'validate'
+  #Terraform paln
+  - task: TerraformTaskV4@4
+    displayName: terraform plan
+    inputs:
+      provider: 'azurerm'
+      command: 'plan'
+      environmentServiceNameAzureRM: 'BeStrong'
+      commandOptions: >- 
+                        -var="location=$(location)"
+  #Terraform apply 
+  - task: TerraformTaskV4@4
+    condition: or(eq(variables['Build.Reason'], 'BatchedCI'), eq(variables['Build.Reason'], 'IndividualCI'))
+    displayName: terraform apply
+    inputs:
+      provider: 'azurerm'
+      command: 'apply'
+      environmentServiceNameAzureRM: 'BeStrong'
+      commandOptions: >-
+                        -auto-approve 
+                        -var="location=$(location)"

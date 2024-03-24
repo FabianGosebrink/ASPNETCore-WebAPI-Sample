@@ -1,0 +1,31 @@
+trigger:
+  batch: true
+  branches:
+    include:
+      - master
+  paths:
+    exclude:
+      - README.md
+      - pipelines
+
+pr:
+  branches:
+    include:
+      - master
+  paths:
+    exclude:
+      - README.md
+      - pipelines
+
+stages:
+  - stage: Terraform
+    displayName: Infrastructure deplyment/test
+    pool:
+      vmImage: ubuntu-latest
+    jobs:
+      - job: TerraformPlanApply
+        displayName: Code validation and infrastructure deploy (terraform validate/aplly) on commit or on PR just validation
+        steps:
+          - template: pipelines/tamplates/terraform-templates/terraform-pr-commit.yml
+            parameters: 
+              Build.Reason: Build.Reason
