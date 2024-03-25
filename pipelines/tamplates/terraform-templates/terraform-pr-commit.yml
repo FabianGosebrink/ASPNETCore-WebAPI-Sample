@@ -11,9 +11,9 @@ steps:
     inputs:
       provider: 'azurerm'
       command: 'init'
-      backendServiceArm: 'BeStrong'
+      backendServiceArm: 'BeStrong-api'
       backendAzureRmResourceGroupName: 'tf-tfstate-ResourceGroup'
-      backendAzureRmStorageAccountName: 'tfstate12342'
+      backendAzureRmStorageAccountName: 'tfstate123423232'
       backendAzureRmContainerName: 'tf-tfstate-for-production'
       backendAzureRmKey: 'prod.tfstate'
   #Code validation
@@ -28,7 +28,7 @@ steps:
     inputs:
       provider: 'azurerm'
       command: 'plan'
-      environmentServiceNameAzureRM: 'BeStrong'
+      environmentServiceNameAzureRM: 'BeStrong-api'
       commandOptions: >- 
                         -var="location=$(location)"
   #Terraform apply 
@@ -38,7 +38,7 @@ steps:
     inputs:
       provider: 'azurerm'
       command: 'apply'
-      environmentServiceNameAzureRM: 'BeStrong'
+      environmentServiceNameAzureRM: 'BeStrong-api'
       commandOptions: >-
                         -auto-approve 
                         -var="location=$(location)"

@@ -26,6 +26,6 @@ stages:
       - job: TerraformPlanApply
         displayName: Code validation and infrastructure deploy (terraform validate/aplly) on commit or on PR just validation
         steps:
-          - template: pipelines/tamplates/terraform-templates/terraform-pr-commit.yml
+          - template: tamplates/terraform-templates/terraform-pr-commit.yml
             parameters: 
               Build.Reason: variables['Build.Reason']
