@@ -28,4 +28,4 @@ stages:
         steps:
           - template: pipelines/tamplates/terraform-templates/terraform-pr-commit.yml
             parameters: 
-              Build.Reason: Build.Reason
+              Build.Reason: variables['Build.Reason']
