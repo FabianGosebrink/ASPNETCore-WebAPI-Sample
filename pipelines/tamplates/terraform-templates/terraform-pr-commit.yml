@@ -12,7 +12,7 @@ steps:
       provider: 'azurerm'
       command: 'init'
       backendServiceArm: 'BeStrong-api'
-      backendAzureRmResourceGroupName: 'tf-tfstate-ResourceGroup'
+      backendAzureRmResourceGroupName: 'NetworkWatcherRG'
       backendAzureRmStorageAccountName: 'tfstate123423232'
       backendAzureRmContainerName: 'tf-tfstate-for-production'
       backendAzureRmKey: 'prod.tfstate'
