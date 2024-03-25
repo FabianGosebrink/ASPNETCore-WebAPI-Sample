@@ -1,4 +1,4 @@
-# test 7
+# test 8
 locals {
   name_location = replace(lower(var.location), " ", "-")
   env           = "prod"
