@@ -16,6 +16,7 @@ steps:
       backendAzureRmStorageAccountName: 'tfstate123423232'
       backendAzureRmContainerName: 'tf-tfstate-for-production'
       backendAzureRmKey: 'prod.tfstate'
+      workingDirectory: '$(System.DefaultWorkingDirectory)/Infrastructure'
   #Code validation
   - task: TerraformTaskV4@4
     displayName: terraform validate
@@ -29,6 +30,7 @@ steps:
       provider: 'azurerm'
       command: 'plan'
       environmentServiceNameAzureRM: 'BeStrong-api'
+      workingDirectory: '$(System.DefaultWorkingDirectory)/Infrastructure'
       commandOptions: >- 
                         -var="location=$(location)"
   #Terraform apply 
@@ -39,6 +41,7 @@ steps:
       provider: 'azurerm'
       command: 'apply'
       environmentServiceNameAzureRM: 'BeStrong-api'
+      workingDirectory: '$(System.DefaultWorkingDirectory)/Infrastructure'
       commandOptions: >-
                         -auto-approve 
                         -var="location=$(location)"
