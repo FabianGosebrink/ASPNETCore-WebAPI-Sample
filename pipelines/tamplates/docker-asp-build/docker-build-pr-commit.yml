@@ -12,7 +12,7 @@ steps:
     displayName: Build and publish image to Azure Container Registry
     inputs:
       command: buildAndPush
-      containerRegistry: $(dockerRegistryServiceConnection)
-      repository: $(imageRepository)
+      containerRegistry: ${{parameters.dockerRegistryServiceConnection}}
+      repository: ${{parameters.imageRepository}}
       dockerfile: "$(System.DefaultWorkingDirectory)/Dockerfile"
-      tags: $(tag)
+      tags: ${{parameters.tag}}
