@@ -41,7 +41,7 @@ stages:
             parameters:
               dockerRegistryServiceConnection: BeStrong-CR
               imageRepository: $(imageRepository)
-              tag: "latest"
+              tag: '$Build.BuildId'
 
   - stage: DeployWebApp
     displayName: Deploy docker image to web app
