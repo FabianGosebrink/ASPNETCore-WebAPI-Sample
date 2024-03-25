@@ -27,7 +27,7 @@ module "app_services" {
   location                          = var.location
   resource_group_name               = azurerm_resource_group.default-RG.name
   app_service_name                  = "asp-serverfarm-${join("", [local.env, local.name_location])}-001"
-  web_app_name                      = "lw2323p-web000site-${join("", [local.env, local.name_location])}-001"
+  web_app_name                      = "lw2323p-web0017670site-${join("", [local.env, local.name_location])}-001"
   os_type                           = "Linux"
   sku_name                          = "B1"
   website_port                      = 80

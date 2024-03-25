@@ -1,7 +1,7 @@
 parameters:
-  azureSubscription:
-  containers:
-  appName:
+  azureSubscription: ""
+  containers: ""
+  appName: ""
 steps:
   - task: AzureWebAppContainer@1
     displayName: Deploy to Azure container web app

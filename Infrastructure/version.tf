@@ -10,8 +10,8 @@ terraform {
     }
   }
   backend "azurerm" {
-    resource_group_name  = "DefaultResourceGroup-EUS"
-    storage_account_name = "tfstate12342"
+    resource_group_name  = "NetworkWatcherRG"
+    storage_account_name = "tfstate123423232"
     container_name       = "tf-tfstate-for-production"
     key                  = "prod.tfstate"
   }

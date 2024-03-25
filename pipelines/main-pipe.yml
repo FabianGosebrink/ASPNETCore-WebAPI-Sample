@@ -39,7 +39,7 @@ stages:
         steps:
           - template: tamplates/docker-asp-build/docker-build-pr-commit.yml
             parameters:
-              dockerRegistryServiceConnection: $(dockerRegistryServiceConnection)
+              dockerRegistryServiceConnection: BeStrong-CR
               imageRepository: $(imageRepository)
               tag: variables['Build.BuildNumber']
 
