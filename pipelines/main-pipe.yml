@@ -34,7 +34,7 @@ stages:
   - stage: DockerBuildPush
     displayName: Docker image build and push to ACR
     jobs:
-      - job: Docker build
+      - job: DockerBuildPush
         displayName: Build docker and push docker image to ACR
         steps:
           - template: tamplates/docker-asp-build/docker-build-pr-commit.yml

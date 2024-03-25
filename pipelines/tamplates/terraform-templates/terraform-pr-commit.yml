@@ -35,7 +35,7 @@ steps:
         -var="location=$(location)"
   #Terraform apply
   - task: TerraformTaskV4@4
-    condition: or(eq($(Build.Reason), 'BatchedCI'), eq($('Build.Reason'), 'IndividualCI'))
+    condition: or(eq(variables['Build.Reason'], 'BatchedCI'), eq(variables['Build.Reason'], 'IndividualCI'))
     displayName: terraform apply
     inputs:
       provider: "azurerm"
