@@ -54,4 +54,4 @@ stages:
             parameters:
               azureSubscription: $(Subscription)
               containers: "acrwebappcontregprodeastus001.azurecr.io/$(imageRepository):latest"
-              appName: "lw2323p-web000site-prodeast-us-001"
+              appName: "lw2323p-web0017670site-prodeast-us-001"
