@@ -2,7 +2,7 @@ trigger:
   batch: true
   branches:
     include:
-      - master
+      - main  
   paths:
     exclude:
       - README.md
@@ -17,15 +17,41 @@ pr:
       - README.md
       - pipelines
 
+pool:
+  vmImage: ubuntu-latest
+
 stages:
   - stage: Terraform
     displayName: Infrastructure deplyment/test
-    pool:
-      vmImage: ubuntu-latest
     jobs:
       - job: TerraformPlanApply
         displayName: Code validation and infrastructure deploy (terraform validate/aplly) on commit or on PR just validation
         steps:
           - template: tamplates/terraform-templates/terraform-pr-commit.yml
-            parameters: 
+            parameters:
               Build.Reason: variables['Build.Reason']
+
+  - stage: DockerBuildPush
+    displayName: Docker image build and push to ACR
+    jobs:
+      - job: Docker build
+        displayName: Build docker and push docker image to ACR
+        steps:
+          - template: tamplates/docker-asp-build/docker-build-pr-commit.yml
+            parameters:
+              dockerRegistryServiceConnection: $(dockerRegistryServiceConnection)
+              imageRepository: $(imageRepository)
+              tag: variables['Build.BuildNumber']
+
+  - stage: DeployWebApp
+    displayName: Deploy docker image to web app
+    condition: or(eq(variables['Build.Reason'], 'BatchedCI'), eq(variables['Build.Reason'], 'IndividualCI'))
+    jobs:
+      - job: Deployment
+        displayName: Deploy to web app from ACR
+        steps:
+          - template: tamplates/docker-asp-build/web-app-deploy.yml
+            parameters:
+              azureSubscription: $(Subscription)
+              containers: "acrwebappcontregprodeastus001.azurecr.io/$(imageRepository):latest"
+              appName: "lw2323p-web000site-prodeast-us-001"

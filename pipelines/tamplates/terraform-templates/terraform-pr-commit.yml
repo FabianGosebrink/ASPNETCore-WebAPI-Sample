@@ -1,47 +1,47 @@
-# This is template for commit 
+# This is template for commit
 parameters:
   Build.Reason: ""
 steps:
   - task: TerraformInstaller@1
     displayName: "Latest Version of terraform installation"
     inputs:
-      terraformVersion: 'latest'
+      terraformVersion: "latest"
   - task: TerraformTaskV4@4
     displayName: terraform init
     inputs:
-      provider: 'azurerm'
-      command: 'init'
-      backendServiceArm: 'BeStrong-api'
-      backendAzureRmResourceGroupName: 'NetworkWatcherRG'
-      backendAzureRmStorageAccountName: 'tfstate123423232'
-      backendAzureRmContainerName: 'tf-tfstate-for-production'
-      backendAzureRmKey: 'prod.tfstate'
-      workingDirectory: '$(System.DefaultWorkingDirectory)/Infrastructure'
+      provider: "azurerm"
+      command: "init"
+      backendServiceArm: "BeStrong-api"
+      backendAzureRmResourceGroupName: "NetworkWatcherRG"
+      backendAzureRmStorageAccountName: "tfstate123423232"
+      backendAzureRmContainerName: "tf-tfstate-for-production"
+      backendAzureRmKey: "prod.tfstate"
+      workingDirectory: "$(System.DefaultWorkingDirectory)/Infrastructure"
   #Code validation
   - task: TerraformTaskV4@4
     displayName: terraform validate
     inputs:
-      provider: 'azurerm'
-      command: 'validate'
+      provider: "azurerm"
+      command: "validate"
   #Terraform paln
   - task: TerraformTaskV4@4
     displayName: terraform plan
     inputs:
-      provider: 'azurerm'
-      command: 'plan'
-      environmentServiceNameAzureRM: 'BeStrong-api'
-      workingDirectory: '$(System.DefaultWorkingDirectory)/Infrastructure'
-      commandOptions: >- 
-                        -var="location=$(location)"
-  #Terraform apply 
+      provider: "azurerm"
+      command: "plan"
+      environmentServiceNameAzureRM: "BeStrong-api"
+      workingDirectory: "$(System.DefaultWorkingDirectory)/Infrastructure"
+      commandOptions: >-
+        -var="location=$(location)"
+  #Terraform apply
   - task: TerraformTaskV4@4
-    condition: or(eq(variables['Build.Reason'], 'BatchedCI'), eq(variables['Build.Reason'], 'IndividualCI'))
+    condition: or(eq($(Build.Reason), 'BatchedCI'), eq($('Build.Reason'), 'IndividualCI'))
     displayName: terraform apply
     inputs:
-      provider: 'azurerm'
-      command: 'apply'
-      environmentServiceNameAzureRM: 'BeStrong-api'
-      workingDirectory: '$(System.DefaultWorkingDirectory)/Infrastructure'
+      provider: "azurerm"
+      command: "apply"
+      environmentServiceNameAzureRM: "BeStrong-api"
+      workingDirectory: "$(System.DefaultWorkingDirectory)/Infrastructure"
       commandOptions: >-
-                        -auto-approve 
-                        -var="location=$(location)"
+        -auto-approve 
+        -var="location=$(location)"

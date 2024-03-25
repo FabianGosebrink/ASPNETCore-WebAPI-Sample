@@ -1,0 +1,18 @@
+# This is template for commit
+parameters:
+  dockerRegistryServiceConnection: ""
+  imageRepository: ""
+  tag: ""
+steps:
+  - task: DockerInstaller@0
+    displayName: Docker install
+    inputs:
+      dockerVersion: "26.0.0-ce"
+  - task: Docker@2
+    displayName: Build and publish image to Azure Container Registry
+    inputs:
+      command: buildAndPush
+      containerRegistry: $(dockerRegistryServiceConnection)
+      repository: $(imageRepository)
+      dockerfile: "$(System.DefaultWorkingDirectory)/Dockerfile"
+      tags: $(tag)
