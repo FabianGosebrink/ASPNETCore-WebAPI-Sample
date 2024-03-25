@@ -53,5 +53,5 @@ stages:
           - template: tamplates/docker-asp-build/web-app-deploy.yml
             parameters:
               azureSubscription: $(Subscription)
-              containers: "acrwebappcontregprodeastus001.azurecr.io/$(imageRepository):latest"
+              containers: "acrwebappcontregprodeastus001.azurecr.io/maksymrepository:latest"
               appName: "lw2323p-web0017670site-prodeast-us-001"
