@@ -67,8 +67,8 @@ jobs:
       tags: |
         $(imageTag)
     env:
-      ASPNETCORE_ENVIRONMENT: Development
-      ASPNETCORE_URLS: http://*:80
+      ASPNETCORE_ENVIRONMENT: 'Development'
+      ASPNETCORE_URLS: 'http://*:80'
 
 - job: deployToWebApp
   displayName: 'Deploy Docker image to Azure Web App'

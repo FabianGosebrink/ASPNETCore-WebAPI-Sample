@@ -19,7 +19,4 @@ RUN dotnet publish "SampleWebApiAspNetCore.csproj" -c Release -o /app/publish
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENV ASPNETCORE_URLS=http://*:80
-ENV ASPNETCORE_ENVIRONMENT=Development
-# ^^^ According to the task description, Swagger should be available
 ENTRYPOINT ["dotnet", "SampleWebApiAspNetCore.dll"]

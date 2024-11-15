@@ -17,4 +17,9 @@ resource "azurerm_linux_web_app" "appsvc" {
   site_config {
     always_on = false
   }
+  app_settings = {
+    ASPNETCORE_URLS = "http://*:80"
+    ASPNETCORE_ENVIRONMENT = "Development"
+  }
+
 }

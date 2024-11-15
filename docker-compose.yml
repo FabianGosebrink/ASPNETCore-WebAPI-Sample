@@ -4,3 +4,6 @@ services:
     build: .
     ports:
       - "80:80"
+    environment:
+      - ASPNETCORE_URLS = "http://*:80"
+      - ASPNETCORE_ENVIRONMENT = "Development"
