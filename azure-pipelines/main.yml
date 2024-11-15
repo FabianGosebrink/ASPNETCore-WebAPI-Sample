@@ -54,18 +54,6 @@ jobs:
 
 - job: buildAndPush
   displayName: 'Build and push Docker image to container registry'
-  dependsOn: infrastructure
-  steps:
-    - task: Docker@2
-      inputs:
-        containerRegistry: '$(containerRegistry)'
-        repository: 'sample-web-api'
-        command: 'buildAndPush'
-        Dockerfile: '**/Dockerfile'
-        tags: 'latest'
-
-- job: buildAndPush
-  displayName: 'Build and push Docker image to container registry'
   pool:
     vmImage: $(vmImageName)
   steps:
