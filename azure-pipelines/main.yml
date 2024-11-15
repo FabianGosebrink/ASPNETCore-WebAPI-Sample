@@ -66,9 +66,6 @@ jobs:
       containerRegistry: $(dockerRegistryServiceConnection)
       tags: |
         $(imageTag)
-    env:
-      ASPNETCORE_ENVIRONMENT: Production
-      ASPNETCORE_URLS: http://*:80
 
 - job: deployToWebApp
   displayName: 'Deploy Docker image to Azure Web App'
