@@ -1,0 +1,76 @@
+trigger:
+- main
+
+pool:
+  vmImage: ubuntu-latest
+
+jobs:
+variables:  # Can be replaced by pipeline environments
+  containerRegistry: 'BeStrongContainerRegistryTask3'
+  webAppName:        'BeStrong-appservice-task3'
+  az_res_group_name:    'BeStrong_task3'
+  az_res_group_location: 'uksouth'
+
+- job: infrastructure
+  displayName: 'Creation of infrastructure'
+  steps:
+    - task: TerraformInstaller@1
+      inputs:
+        terraformVersion: 'latest'
+      displayName: 'Terraform Install'
+    - task: TerraformTaskV4@4
+      inputs:
+        workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
+        provider: 'azurerm'
+        command: 'init'
+        backendServiceArm: $(backendServiceArm)
+        backendAzureRmResourceGroupName: $(backendAzureRmResourceGroupName)
+        backendAzureRmStorageAccountName: $(backendAzureRmStorageAccountName)
+        backendAzureRmContainerName: $(backendAzureRmContainerName)
+        backendAzureRmKey: '$(backendAzureRmKey).tfstate'
+      displayName: 'Terraform Init'
+    - task: TerraformTaskV4@4
+      displayName: 'Validate'
+      inputs:
+        provider: 'azurerm'
+        command: 'validate'
+      env:
+          TF_VAR_container_registry_name: '$(containerRegistry)'
+          TF_VAR_web_app_name: $(webAppName)
+          TF_VAR_res_group_name: $(az_res_group_name)
+          TF_VAR_res_group_location: $(az_res_group_location)
+    - task: TerraformTaskV4@4
+      displayName: 'Terraform Apply'
+      inputs:
+        provider: 'azurerm'
+        command: 'apply'
+        environmentServiceNameAzureRM: $(environmentServiceNameAzureRM)
+        commandOptions: '-input=false -auto-approve'
+        workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
+      env:
+          TF_VAR_container_registry_name: '$(containerRegistry)'
+          TF_VAR_web_app_name: $(webAppName)
+          TF_VAR_res_group_name: $(az_res_group_name)
+          TF_VAR_res_group_location: $(az_res_group_location)
+
+- job: buildAndPush
+  displayName: 'Build and push Docker image to container registry'
+  dependsOn: infrastructure
+  steps:
+    - task: Docker@2
+      inputs:
+        containerRegistry: '$(containerRegistry)'
+        repository: 'sample-web-api'
+        command: 'buildAndPush'
+        Dockerfile: '**/Dockerfile'
+        tags: 'latest'
+
+- job: deployToWebApp
+  displayName: 'Deploy Docker image to Azure Web App'
+  dependsOn: buildAndPush
+  steps:
+    - task: AzureWebAppContainer@1
+      inputs:
+        azureSubscription: '$(azureSubscription)'
+        appName: '$(webAppName)'
+        imageName: '$(containerRegistry)/sample-web-api:latest'
