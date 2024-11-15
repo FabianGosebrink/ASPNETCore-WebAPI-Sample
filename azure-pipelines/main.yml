@@ -4,11 +4,8 @@ trigger:
 pool:
   vmImage: ubuntu-latest
 
-variables:  # Can be replaced by pipeline environments
-  containerRegistry: 'BeStrongContainerRegistryTask3'
-  webAppName:        'BeStrong-appservice-task3'
-  az_res_group_name:    'BeStrong_task3'
-  az_res_group_location: 'uksouth'
+variables:
+  - group: terraform_vars
 
 jobs:
 - job: infrastructure
