@@ -78,6 +78,6 @@ jobs:
   steps:
     - task: AzureWebAppContainer@1
       inputs:
-        azureSubscription: '$(azureSubscription)'
+        azureSubscription: '$(environmentServiceNameAzureRM)'
         appName: '$(webAppName)'
         imageName: '$(containerRegistry)/$(imageRepository):$(imageTag)'
