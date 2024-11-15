@@ -17,5 +17,7 @@ resource "azurerm_linux_web_app" "appsvc" {
   site_config {
     always_on = false
   }
-  app_settings = "WEBSITES_PORT=5001"
+  app_settings = {
+    "WEBSITES_PORT" = "5001"
+  }
 }
