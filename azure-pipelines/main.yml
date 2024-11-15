@@ -10,7 +10,7 @@ variables:
     value: '$(Build.SourcesDirectory)/Dockerfile'
   - name: vmImageName
     value: 'ubuntu-latest'
-  - imageTag:
+  - name: imageTag
     value: '$(Build.BuildId)'
 
 jobs:
