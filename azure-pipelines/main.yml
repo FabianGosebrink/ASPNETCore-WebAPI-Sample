@@ -6,8 +6,10 @@ pool:
 
 variables:
   - group: terraform_vars
-  dockerfilePath: '$(Build.SourcesDirectory)/Dockerfile'
-  vmImageName: 'ubuntu-latest'
+  - name: dockerfilePath
+    value: '$(Build.SourcesDirectory)/Dockerfile'
+  - name: vmImageName
+    value: 'ubuntu-latest'
 
 jobs:
 - job: infrastructure
