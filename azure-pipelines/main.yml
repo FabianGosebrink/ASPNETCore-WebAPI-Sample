@@ -67,7 +67,7 @@ jobs:
       tags: |
         $(imageTag)
     env:
-      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_URLS: http://*:80
 
 - job: deployToWebApp
