@@ -10,6 +10,8 @@ variables:
     value: '$(Build.SourcesDirectory)/Dockerfile'
   - name: vmImageName
     value: 'ubuntu-latest'
+  - imageTag:
+    value: '$(Build.BuildId)'
 
 jobs:
 - job: infrastructure
@@ -55,6 +57,7 @@ jobs:
           TF_VAR_res_group_location: $(az_res_group_location)
 
 - job: buildAndPush
+  dependsOn: infrastructure
   displayName: 'Build and push Docker image to container registry'
   pool:
     vmImage: $(vmImageName)
@@ -67,14 +70,14 @@ jobs:
       dockerfile: $(dockerfilePath)
       containerRegistry: $(dockerRegistryServiceConnection)
       tags: |
-        $(Build.BuildId)
+        $(imageTag)
 
-# - job: deployToWebApp
-#   displayName: 'Deploy Docker image to Azure Web App'
-#   dependsOn: buildAndPush
-#   steps:
-#     - task: AzureWebAppContainer@1
-#       inputs:
-#         azureSubscription: '$(azureSubscription)'
-#         appName: '$(webAppName)'
-#         imageName: '$(containerRegistry)/sample-web-api:latest'
+- job: deployToWebApp
+  displayName: 'Deploy Docker image to Azure Web App'
+  dependsOn: buildAndPush
+  steps:
+    - task: AzureWebAppContainer@1
+      inputs:
+        azureSubscription: '$(azureSubscription)'
+        appName: '$(webAppName)'
+        imageName: '$(containerRegistry)/$(imageRepository):$(imageTag)'
