@@ -81,3 +81,4 @@ jobs:
         azureSubscription: '$(environmentServiceNameAzureRM)'
         appName: '$(webAppName)'
         imageName: '$(containerRegistry)/$(imageRepository):$(imageTag)'
+        appSettings: '-WEBSITES_PORT=5001'
