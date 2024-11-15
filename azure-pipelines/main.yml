@@ -52,7 +52,7 @@ jobs:
 #           TF_VAR_res_group_location: $(az_res_group_location)
 
 - job: buildAndPush
-  dependsOn: infrastructure
+  #dependsOn: infrastructure
   displayName: 'Build and push Docker image to container registry'
   pool:
     vmImage: $(vmImageName)
