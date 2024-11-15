@@ -14,50 +14,45 @@ variables:
     value: '$(Build.BuildId)'
 
 jobs:
-# - job: infrastructure
-#   displayName: 'Creation of infrastructure'
-#   steps:
-#     - task: TerraformInstaller@1
-#       inputs:
-#         terraformVersion: 'latest'
-#       displayName: 'Terraform Install'
-#     - task: TerraformTaskV4@4
-#       inputs:
-#         workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
-#         provider: 'azurerm'
-#         command: 'init'
-#         backendServiceArm: $(backendServiceArm)
-#         backendAzureRmResourceGroupName: $(backendAzureRmResourceGroupName)
-#         backendAzureRmStorageAccountName: $(backendAzureRmStorageAccountName)
-#         backendAzureRmContainerName: $(backendAzureRmContainerName)
-#         backendAzureRmKey: '$(backendAzureRmKey).tfstate'
-#       displayName: 'Terraform Init'
-#     - task: TerraformTaskV4@4
-#       displayName: 'Validate'
-#       inputs:
-#         provider: 'azurerm'
-#         command: 'validate'
-#       env:
-#           TF_VAR_container_registry_name: '$(containerRegistry)'
-#           TF_VAR_web_app_name: $(webAppName)
-#           TF_VAR_res_group_name: $(az_res_group_name)
-#           TF_VAR_res_group_location: $(az_res_group_location)
-#     - task: TerraformTaskV4@4
-#       displayName: 'Terraform Apply'
-#       inputs:
-#         provider: 'azurerm'
-#         command: 'apply'
-#         environmentServiceNameAzureRM: $(environmentServiceNameAzureRM)
-#         commandOptions: '-input=false -auto-approve'
-#         workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
-#       env:
-#           TF_VAR_container_registry_name: '$(containerRegistry)'
-#           TF_VAR_web_app_name: $(webAppName)
-#           TF_VAR_res_group_name: $(az_res_group_name)
-#           TF_VAR_res_group_location: $(az_res_group_location)
+- job: infrastructure
+  displayName: 'Creation of infrastructure'
+  steps:
+    - task: TerraformInstaller@1
+      inputs:
+        terraformVersion: 'latest'
+      displayName: 'Terraform Install'
+    - task: TerraformTaskV4@4
+      inputs:
+        workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
+        provider: 'azurerm'
+        command: 'init'
+        backendServiceArm: $(backendServiceArm)
+        backendAzureRmResourceGroupName: $(backendAzureRmResourceGroupName)
+        backendAzureRmStorageAccountName: $(backendAzureRmStorageAccountName)
+        backendAzureRmContainerName: $(backendAzureRmContainerName)
+        backendAzureRmKey: '$(backendAzureRmKey).tfstate'
+      displayName: 'Terraform Init'
+    - task: TerraformTaskV4@4
+      displayName: 'Validate'
+      inputs:
+        provider: 'azurerm'
+        command: 'validate'
+    - task: TerraformTaskV4@4
+      displayName: 'Terraform Apply'
+      inputs:
+        provider: 'azurerm'
+        command: 'apply'
+        environmentServiceNameAzureRM: $(environmentServiceNameAzureRM)
+        commandOptions: '-input=false -auto-approve'
+        workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
+      env:
+          TF_VAR_container_registry_name: '$(containerRegistry)'
+          TF_VAR_web_app_name: $(webAppName)
+          TF_VAR_res_group_name: $(az_res_group_name)
+          TF_VAR_res_group_location: $(az_res_group_location)
 
 - job: buildAndPush
-  #dependsOn: infrastructure
+  dependsOn: infrastructure
   displayName: 'Build and push Docker image to container registry'
   pool:
     vmImage: $(vmImageName)
@@ -81,4 +76,3 @@ jobs:
         azureSubscription: '$(environmentServiceNameAzureRM)'
         appName: '$(webAppName)'
         imageName: '$(containerRegistry)/$(imageRepository):$(imageTag)'
-        appSettings: 'WEBSITES_PORT=5001'
