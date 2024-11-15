@@ -6,6 +6,8 @@ pool:
 
 variables:
   - group: terraform_vars
+  dockerfilePath: '$(Build.SourcesDirectory)/Dockerfile'
+  vmImageName: 'ubuntu-latest'
 
 jobs:
 - job: infrastructure
@@ -62,12 +64,27 @@ jobs:
         Dockerfile: '**/Dockerfile'
         tags: 'latest'
 
-- job: deployToWebApp
-  displayName: 'Deploy Docker image to Azure Web App'
-  dependsOn: buildAndPush
+- job: buildAndPush
+  displayName: 'Build and push Docker image to container registry'
+  pool:
+    vmImage: $(vmImageName)
   steps:
-    - task: AzureWebAppContainer@1
-      inputs:
-        azureSubscription: '$(azureSubscription)'
-        appName: '$(webAppName)'
-        imageName: '$(containerRegistry)/sample-web-api:latest'
+  - task: Docker@2
+    displayName: Build and push an image to container registry
+    inputs:
+      command: buildAndPush
+      repository: $(imageRepository)
+      dockerfile: $(dockerfilePath)
+      containerRegistry: $(dockerRegistryServiceConnection)
+      tags: |
+        $(Build.BuildId)
+
+# - job: deployToWebApp
+#   displayName: 'Deploy Docker image to Azure Web App'
+#   dependsOn: buildAndPush
+#   steps:
+#     - task: AzureWebAppContainer@1
+#       inputs:
+#         azureSubscription: '$(azureSubscription)'
+#         appName: '$(webAppName)'
+#         imageName: '$(containerRegistry)/sample-web-api:latest'
