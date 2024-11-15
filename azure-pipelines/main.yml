@@ -5,7 +5,7 @@ pool:
   vmImage: ubuntu-latest
 
 variables:
-  - group: terraform_vars
+  group: terraform_vars
   dockerfilePath: '$(Build.SourcesDirectory)/Dockerfile'
   vmImageName: 'ubuntu-latest'
 
