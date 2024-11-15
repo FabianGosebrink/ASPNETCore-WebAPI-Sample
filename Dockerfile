@@ -1,8 +1,7 @@
-EXPOSE 80
-ENV ASPNETCORE_URLS=http://*:80
 # Use the official ASP.NET Core runtime as a base image
 FROM mcr.microsoft.com/dotnet/aspnet:7.0 AS base
 WORKDIR /app
+EXPOSE 5001
 
 # Use the SDK image to build the app
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
