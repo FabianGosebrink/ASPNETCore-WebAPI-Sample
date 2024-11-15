@@ -2,9 +2,6 @@
 FROM mcr.microsoft.com/dotnet/aspnet:7.0 AS base
 WORKDIR /app
 EXPOSE 80
-ENV ASPNETCORE_URLS=http://*:80
-ENV ASPNETCORE_ENVIRONMENT=Development
-# ^^^ According to the task description, Swagger should be available
 
 # Use the SDK image to build the app
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
@@ -22,4 +19,7 @@ RUN dotnet publish "SampleWebApiAspNetCore.csproj" -c Release -o /app/publish
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+ENV ASPNETCORE_URLS=http://*:80
+ENV ASPNETCORE_ENVIRONMENT=Development
+# ^^^ According to the task description, Swagger should be available
 ENTRYPOINT ["dotnet", "SampleWebApiAspNetCore.dll"]
