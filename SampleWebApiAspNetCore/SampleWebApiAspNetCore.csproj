@@ -14,7 +14,7 @@
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning.ApiExplorer" Version="5.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="7.0.2" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
-    <PackageReference Include="System.Linq.Dynamic.Core" Version="1.2.24" />
+    <PackageReference Include="System.Linq.Dynamic.Core" Version="1.6.0" />
   </ItemGroup>
 
 </Project>
