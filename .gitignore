@@ -210,3 +210,10 @@ FakesAssemblies/
 GeneratedArtifacts/
 _Pvt_Extensions/
 ModelManifest.xml
+
+# Terraform
+terraform.tfvars
+terraform.tfstate.backup
+terraform.tfstate
+.terraform
+.terraform.lock.hcl
