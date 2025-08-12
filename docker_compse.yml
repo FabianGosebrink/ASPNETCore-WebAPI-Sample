@@ -1,0 +1,8 @@
+docker composefile 
+
+version: '3.8'
+services:
+  webapi:
+    build: .
+    ports:
+      - "5000:5000"
