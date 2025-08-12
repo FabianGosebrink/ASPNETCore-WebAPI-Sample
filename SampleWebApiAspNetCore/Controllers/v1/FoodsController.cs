@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.JsonPatch;
+﻿using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using SampleWebApiAspNetCore.Dtos;
 using SampleWebApiAspNetCore.Entities;
@@ -8,6 +7,7 @@ using SampleWebApiAspNetCore.Services;
 using SampleWebApiAspNetCore.Models;
 using SampleWebApiAspNetCore.Repositories;
 using System.Text.Json;
+using MapsterMapper;
 
 namespace SampleWebApiAspNetCore.Controllers.v1
 {

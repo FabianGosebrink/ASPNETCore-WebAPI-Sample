@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
+using Mapster;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Routing;
@@ -7,7 +7,6 @@ using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Serialization;
 using SampleWebApiAspNetCore;
 using SampleWebApiAspNetCore.Helpers;
-using SampleWebApiAspNetCore.MappingProfiles;
 using SampleWebApiAspNetCore.Repositories;
 using SampleWebApiAspNetCore.Services;
 using Swashbuckle.AspNetCore.SwaggerGen;
@@ -40,7 +39,7 @@ builder.Services.AddVersioning();
 builder.Services.AddDbContext<FoodDbContext>(opt =>
     opt.UseInMemoryDatabase("FoodDatabase"));
 
-builder.Services.AddAutoMapper(typeof(FoodMappings));
+builder.Services.AddMapster();
 
 var app = builder.Build();
 
