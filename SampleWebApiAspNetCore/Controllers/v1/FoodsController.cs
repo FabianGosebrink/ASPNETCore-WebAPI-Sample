@@ -19,13 +19,16 @@ namespace SampleWebApiAspNetCore.Controllers.v1
         private readonly IFoodRepository _foodRepository;
         private readonly IMapper _mapper;
         private readonly ILinkService<FoodsController> _linkService;
+        private readonly IFoodService _foodService
 
         public FoodsController(
             IFoodRepository foodRepository,
+            IFoodService foodService,
             IMapper mapper,
             ILinkService<FoodsController> linkService)
         {
             _foodRepository = foodRepository;
+            _foodService = foodService;
             _mapper = mapper;
             _linkService = linkService;
         }
@@ -33,29 +36,12 @@ namespace SampleWebApiAspNetCore.Controllers.v1
         [HttpGet(Name = nameof(GetAllFoods))]
         public ActionResult GetAllFoods(ApiVersion version, [FromQuery] QueryParameters queryParameters)
         {
-            List<FoodEntity> foodItems = _foodRepository.GetAll(queryParameters).ToList();
-
-            var allItemCount = _foodRepository.Count();
-
-            var paginationMetadata = new
-            {
-                totalCount = allItemCount,
-                pageSize = queryParameters.PageCount,
-                currentPage = queryParameters.Page,
-                totalPages = queryParameters.GetTotalPages(allItemCount)
-            };
-
-            Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(paginationMetadata));
-
-            var links = _linkService.CreateLinksForCollection(queryParameters, allItemCount, version);
-            var toReturn = foodItems.Select(x => _linkService.ExpandSingleFoodItem(x, x.Id, version));
-
-            return Ok(new
-            {
-                value = toReturn,
-                links = links
-            });
+            var result = _foodService.GetAllFoods(queryParameters, version);
+            // Add the X-Pagination header to the response
+            Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(result.PaginationMetadata));
+            return Ok(result);
         }
+
 
         [HttpGet]
         [Route("{id:int}", Name = nameof(GetSingleFood))]
